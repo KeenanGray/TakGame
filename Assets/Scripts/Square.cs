@@ -36,7 +36,7 @@ public class Square : Highlights
             transform.GetChild(0).localScale = new Vector3(0.0375f, .0375f, 0.15f);
         }
         quadCollider = transform.GetChild(0).gameObject;
-        myCol = quadCollider.GetComponent<Collider>();
+        myCol = quadCollider.GetComponent<MeshCollider>();
     }
 
     // Update is called once per frame
@@ -60,6 +60,18 @@ public class Square : Highlights
         else
         {
             GetComponentInChildren<MeshRenderer>().material = Deselected;
+        }
+    }
+
+    void RedoHeights()
+    {
+        for (int i = 1; i < transform.childCount; i++)
+        {
+            var yPos = 0f;
+            float stoneOffset = 0.006f;
+            yPos = (transform.GetChild(i).GetSiblingIndex() - 1) * stoneOffset;
+            transform.GetChild(i).localPosition = new Vector3(0, yPos, 0);
+            transform.GetChild(i).GetComponent<Highlights>().SetShouldRaycast(true);
         }
     }
 }

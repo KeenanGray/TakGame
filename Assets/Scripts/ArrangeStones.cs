@@ -10,8 +10,6 @@ public class ArrangeStones : MonoBehaviour
     bool needToAdd = true;
 
     GameObject StonesPool;
-    public Material PlayerOneMat;
-    public Material PlayerTwoMat;
 
     [Range(0.0001f, 0.05f)]
     public float offset = 0;
@@ -19,7 +17,9 @@ public class ArrangeStones : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+
     }
+
 
     // Update is called once per frame
     void Update()
@@ -105,7 +105,6 @@ public class ArrangeStones : MonoBehaviour
             }
         }
 
-
         int i = 0;
         int Max = 30;
 
@@ -114,8 +113,6 @@ public class ArrangeStones : MonoBehaviour
         {
             var t1 = StonesPool.transform.GetChild(0).transform;
             t1.SetParent(PlayerOnePool);
-            t1.GetComponent<MeshRenderer>().material = PlayerOneMat;
-            t1.GetComponent<Stone>().Deselected = PlayerOneMat;
 
 
             //only move it if we have room in the tray
@@ -133,13 +130,11 @@ public class ArrangeStones : MonoBehaviour
             i++;
         }
         i = 0;
+
         while (i < number)
         {
             var t2 = StonesPool.transform.GetChild(1).transform;
             t2.SetParent(PlayerTwoPool);
-            t2.GetComponent<MeshRenderer>().material = PlayerTwoMat;
-            t2.GetComponent<Stone>().Deselected = PlayerTwoMat;
-
 
             //only move it if we have room in the tray
             if (i < Max / 2)

@@ -65,31 +65,12 @@ public class TakGameManager : MonoBehaviour
             }
             else
             {
-                print("No selected");
-                movesLeft = 0;
-                for (int i = 0; i < Picked.Length; i++)
-                {
-                    if (Picked[i] != null)
-                    {
-                        if (lastParent != null)
-                        {
-                            Picked[i].transform.SetParent(lastParent.transform);
-                            lastParent = null;
-                        }
-                        var yPos = 0f;
-                        float stoneOffset = 0.006f;
-                        yPos = (Picked[i].transform.parent.childCount - 2) * stoneOffset;
-                        Picked[i].transform.localPosition = new Vector3(0, yPos, 0);
-                        Picked[i].GetComponent<Highlights>().SetShouldRaycast(true);
-
-                        Picked[i] = null;
-                    }
-                }
-                EndPieceMove();
+                UndoMove();
             }
         }
     }
 
+    int StackIndex = 0;
     void MakeMove(int p)
     {
         if (Picking.Value)
@@ -115,21 +96,17 @@ public class TakGameManager : MonoBehaviour
                 }
 
                 //Set the parent of the bottom piece
-                var index = movesLeft - 1;
-                if (Picked[index] != null)
+                if (Picked[StackIndex] != null)
                 {
-                    Picked[index].transform.SetParent(t);
-
                     //Put the stone on top of the other stone
+                    Picked[StackIndex].transform.SetParent(t);
                     var yPos = 0f;
                     float stoneOffset = 0.006f;
-                    yPos = (Picked[index].transform.parent.childCount - 2) * stoneOffset;
-                    Picked[index].transform.localPosition = new Vector3(0, yPos, 0);
-
+                    yPos = (Picked[StackIndex].transform.parent.childCount - 2) * stoneOffset;
+                    Picked[StackIndex].transform.localPosition = new Vector3(0, yPos, 0);
+                    Picked[StackIndex].GetComponent<Highlights>().SetShouldRaycast(true);
+                    StackIndex++;
                     movesLeft--;
-                    print("Moves left " + movesLeft);
-
-
                 }
 
                 if (IsMoveOver())
@@ -149,7 +126,6 @@ public class TakGameManager : MonoBehaviour
         if ((Selected.CompareTag("0") || Selected.CompareTag("1")) && !Picking.Value)
         {
             var currentSqr = Selected.transform.parent;
-            print(currentSqr);
             //for the stone and each stone above it in the stack - turn off highlights
             for (int stone = 1; stone < currentSqr.childCount; stone++)
             {
@@ -158,8 +134,9 @@ public class TakGameManager : MonoBehaviour
             var cur = 0;
             for (int stone = Selected.transform.GetSiblingIndex(); stone < Selected.transform.parent.childCount; stone += 1)
             {
+
                 Picking.Value = true;
-                lastParent = Selected.gameObject;
+                lastParent = Selected.transform.parent.gameObject;
                 //There is no errory checking here that the differnece will be less than 5 but *Shrug*
                 movesLeft++;
                 Picked[cur] = Selected.transform.parent.GetChild(stone).gameObject;
@@ -167,9 +144,6 @@ public class TakGameManager : MonoBehaviour
                 cur++;
             }
             print("picked " + Picked[0] + ", " + Picked[1] + ", " + Picked[2] + ", " + Picked[3] + ", " + Picked[4]);
-
-
-
 
             //Figure out board index and get spaces we can move to
             var self = Selected.transform.parent.GetSiblingIndex();
@@ -228,9 +202,6 @@ public class TakGameManager : MonoBehaviour
             return;
         }
 
-
-
-
         //we are placing on a selected space
         if (Selected.CompareTag("Space") && !Picking.Value)
         {
@@ -254,6 +225,27 @@ public class TakGameManager : MonoBehaviour
 
     }
 
+    void UndoMove()
+    {
+        if (lastParent == null || !Picking.Value)
+            return;
+
+        //put back any pieces we may have moved
+        for (int i = 0; i < Picked.Length; i++)
+        {
+            if (Picked[i] == null)
+                continue;
+
+            Picked[i].transform.SetParent(lastParent.transform);
+            var target = Picked[i].transform.parent.childCount + i;
+            Picked[i].transform.SetSiblingIndex(target);
+
+            lastParent.GetComponent<Square>().SendMessage("RedoHeights");
+        }
+        movesLeft = 0;
+        EndPieceMove();
+    }
+
     void ChangePlayer(int p)
     {
         if (p == 0)
@@ -264,37 +256,45 @@ public class TakGameManager : MonoBehaviour
         {
             CurrentPlayer.Value = 0;
         }
+        ResetRaycasts();
+    }
 
+    void ResetRaycasts()
+    {
         //When we change the player reset what can and can't raycast
         for (int i = 0; i < board.transform.childCount; i++)
         {
             //for every square in the board
             //if the top is the square - allow raycast to that quad
-            if (board.transform.childCount == 1)
-                board.GetComponentInChildren<Highlights>().SetShouldRaycast(true);
+            if (board.transform.GetChild(i).transform.childCount == 1)
+                board.transform.GetChild(i).GetComponentInChildren<Highlights>().SetShouldRaycast(true);
+            else
+                board.transform.GetChild(i).GetComponentInChildren<Highlights>().SetShouldRaycast(false);
+
             //check the top piece
             var currentSqr = board.transform.GetChild(i);
             var topPiece = currentSqr.transform.GetChild(currentSqr.transform.childCount - 1);
 
+            //else do not allow raycast on objects in stack
             if (!topPiece.CompareTag(CurrentPlayer.Value.ToString()))
             {
-                //if the top is the player - allow raycast(to all siblings, but not the quad)
                 for (int sibling = 1; sibling < currentSqr.transform.childCount; sibling++)
                 {
                     currentSqr.GetChild(sibling).GetComponent<Highlights>().SetShouldRaycast(false);
                 }
             }
-            //else do not allow raycast
+            //if the top is the player - allow raycast(to all siblings, but not the quad), down to five
             if (topPiece.CompareTag(CurrentPlayer.Value.ToString()))
             {
-                for (int sibling = 1; sibling < currentSqr.transform.childCount; sibling++)
+                var target = Mathf.Max(currentSqr.transform.childCount - 6, 0);
+                for (int sibling = currentSqr.transform.childCount - 1; sibling > target; sibling--)
                 {
-                    currentSqr.GetChild(sibling).GetComponent<Highlights>().SetShouldRaycast(true);
+                    if (currentSqr.GetChild(sibling) != null)
+                        currentSqr.GetChild(sibling).GetComponent<Highlights>().SetShouldRaycast(true);
                 }
             }
         }
     }
-
 
     void PlaceOnTile(GameObject source, int p)
     {
@@ -309,6 +309,7 @@ public class TakGameManager : MonoBehaviour
         stone.tag = p.ToString();
 
         ChangePlayer(p);
+        ResetRaycasts();
     }
 
     void EndPieceMove()
@@ -320,7 +321,8 @@ public class TakGameManager : MonoBehaviour
         }
         for (int i = 0; i < Picked.Length; i++)
             Picked[i] = null;//set the moved stone to null since we no longer have it selected.
-
+        StackIndex = 0;
+        ResetRaycasts();
     }
 
     private void OnApplicationQuit()
@@ -333,4 +335,3 @@ public class TakGameManager : MonoBehaviour
         return (movesLeft == 0); //down here all picked objects are null so turn is done
     }
 }
-

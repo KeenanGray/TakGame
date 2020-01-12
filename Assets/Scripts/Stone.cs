@@ -9,42 +9,53 @@ public class Stone : Highlights
     [SerializeField]
     IntReference CurrentPlayer;
 
-    [SerializeField]
-    Material[] StoneMats = new Material[2];
-
-    Material Selected;
-    [HideInInspector]
-    public Material Deselected;
+    public Material Selected;
+    public Material PlayerOneMat;
+    public Material PlayerTwoMat;
+    Material Deselected = null;
 
     // Start is called before the first frame update
     void Start()
     {
-        Selected = StoneMats[0];
-        Deselected = StoneMats[1];
         myCol = GetComponent<Collider>();
+        Deselected = null;
     }
 
     // Update is called once per frame
     void Update()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-        if (Physics.Raycast(ray, out hit, 100.0f))
+        if (Deselected == null)
         {
-            //print("hitting " + hit.collider.name);
-            if (hit.collider.gameObject == gameObject)
+            if (transform.parent.name.Contains("One"))
             {
-                GetComponentInChildren<MeshRenderer>().material = Selected;
+                Deselected = PlayerOneMat;
+            }
+            else if (transform.parent.name.Contains("Two"))
+            {
+                Deselected = PlayerTwoMat;
+            }
+
+        }
+        else
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            if (Physics.Raycast(ray, out hit, 100.0f))
+            {
+                //print("hitting " + hit.collider.name);
+                if (hit.collider.gameObject == gameObject)
+                {
+                    GetComponentInChildren<MeshRenderer>().material = Selected;
+                }
+                else
+                {
+                    GetComponentInChildren<MeshRenderer>().material = Deselected;
+                }
             }
             else
             {
                 GetComponentInChildren<MeshRenderer>().material = Deselected;
             }
         }
-        else
-        {
-            GetComponentInChildren<MeshRenderer>().material = Deselected;
-        }
-
     }
 }

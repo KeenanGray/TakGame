@@ -59,7 +59,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 4c9f85bc7982a4540839d7c55316023e, type: 2}
+  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -109,11 +109,6 @@ MonoBehaviour:
     UseConstant: 0
     ConstantValue: 0
     Variable: {fileID: 11400000, guid: 062367a694d8c4f178fa90c7dd944730, type: 2}
-  StoneMats:
-  - {fileID: 2100000, guid: 6f06e3859b7f741b2ae8dd8933ec6a36, type: 2}
-  - {fileID: 2100000, guid: 6f06e3859b7f741b2ae8dd8933ec6a36, type: 2}
-  placing:
-    UseConstant: 1
-    ConstantValue: 0
-    Variable: {fileID: 0}
-  Deselected: {fileID: 2100000, guid: 4c9f85bc7982a4540839d7c55316023e, type: 2}
+  Selected: {fileID: 2100000, guid: 6f06e3859b7f741b2ae8dd8933ec6a36, type: 2}
+  PlayerOneMat: {fileID: 2100000, guid: 4c9f85bc7982a4540839d7c55316023e, type: 2}
+  PlayerTwoMat: {fileID: 2100000, guid: d12248ddf62334e9f96f91a259c43d5f, type: 2}
