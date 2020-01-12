@@ -25,8 +25,6 @@ public class Board : MonoBehaviour
     [SerializeField]
     IntReference iref_BoardSize;
 
-    List<GameObject> Hidden;
-
     private Size lastSize;
 
     public delegate void OnBoardSizeChanged(int BoardSize);
@@ -39,7 +37,6 @@ public class Board : MonoBehaviour
         OnBoardSizeChanagedDelegate += UpdateBoard;
 
         offset = 0.042f;
-        Hidden = new List<GameObject>();
     }
 
     // Update is called once per frame
@@ -107,6 +104,7 @@ public class Board : MonoBehaviour
             x = offset * k;
             k++;
             board.transform.GetChild(j).transform.localPosition = StartPos + new Vector3(x, 0, y);
+            board.transform.GetChild(j).name = "Square " + (j);
         }
 
         //Hide larger objects for big game boards
@@ -114,33 +112,33 @@ public class Board : MonoBehaviour
         {
             HideLargeObjects();
         }
-        else
+        else if (i_BoardSize > 0 && i_BoardSize < 6)
         {
-            ShowLargeObjects();
+            if (this != null)
+                ShowLargeObjects();
         }
     }
 
-    private void OnDestroy()
-    {
-        ShowLargeObjects();
-    }
 
     void HideLargeObjects()
     {
         foreach (GameObject go in GameObject.FindGameObjectsWithTag("HideIfLarge"))
         {
-            Hidden.Add(go);
-            go.SetActive(false);
-        }
+            foreach (MeshRenderer mr in GetComponentsInChildren<MeshRenderer>())
+            {
+                mr.enabled = false;
+            }
 
+        }
     }
     void ShowLargeObjects()
     {
-        foreach (GameObject go in Hidden)
+        foreach (GameObject go in GameObject.FindGameObjectsWithTag("HideIfLarge"))
         {
-            if (go != null)
-                go.SetActive(true);
+            foreach (MeshRenderer mr in GetComponentsInChildren<MeshRenderer>())
+            {
+                mr.enabled = true;
+            }
         }
     }
 }
-

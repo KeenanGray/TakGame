@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Stone : MonoBehaviour
+public class Stone : Highlights
 {
     RaycastHit hit;
 
@@ -21,6 +21,7 @@ public class Stone : MonoBehaviour
     {
         Selected = StoneMats[0];
         Deselected = StoneMats[1];
+        myCol = GetComponent<Collider>();
     }
 
     // Update is called once per frame
@@ -30,11 +31,10 @@ public class Stone : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit, 100.0f))
         {
-            print("hitting " + hit.collider.name);
+            //print("hitting " + hit.collider.name);
             if (hit.collider.gameObject == gameObject)
             {
-                if (transform.CompareTag(CurrentPlayer.Value.ToString()))
-                    GetComponentInChildren<MeshRenderer>().material = Selected;
+                GetComponentInChildren<MeshRenderer>().material = Selected;
             }
             else
             {

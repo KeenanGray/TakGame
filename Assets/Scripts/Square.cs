@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Square : MonoBehaviour
+public class Square : Highlights
 {
     RaycastHit hit;
 
@@ -21,6 +21,7 @@ public class Square : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+
         transform.localScale = new Vector3(1, 1, 1);
         if (iref_BoardSize.Value % 2 != 0)
         {
@@ -35,22 +36,13 @@ public class Square : MonoBehaviour
             transform.GetChild(0).localScale = new Vector3(0.0375f, .0375f, 0.15f);
         }
         quadCollider = transform.GetChild(0).gameObject;
+        myCol = quadCollider.GetComponent<Collider>();
     }
 
     // Update is called once per frame
     void Update()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-        //if we have more than one child and have not swapped layers, swap the QUAD to non-raycast layer
-        if (quadCollider.layer == 0 && transform.childCount > 1)
-        {
-            quadCollider.layer = 2;//ignore raycast layer;
-        }
-        else if (quadCollider.layer == 2 && transform.childCount == 1)
-        {
-            quadCollider.layer = 0;
-        }
 
         if (Physics.Raycast(ray, out hit, 100.0f))
         {
@@ -69,6 +61,5 @@ public class Square : MonoBehaviour
         {
             GetComponentInChildren<MeshRenderer>().material = Deselected;
         }
-
     }
 }

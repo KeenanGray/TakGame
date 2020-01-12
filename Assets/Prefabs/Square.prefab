@@ -65,7 +65,7 @@ GameObject:
   - component: {fileID: 2911912626487533011}
   - component: {fileID: 8445786468911193624}
   - component: {fileID: 6467311876121801228}
-  - component: {fileID: 953640885528100020}
+  - component: {fileID: 8731337171700742630}
   m_Layer: 0
   m_Name: Quad
   m_TagString: Untagged
@@ -133,7 +133,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!64 &953640885528100020
+--- !u!64 &8731337171700742630
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
