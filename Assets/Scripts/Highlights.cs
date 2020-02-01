@@ -2,20 +2,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Highlights : MonoBehaviour
+namespace Tak
 {
-    internal Collider myCol;
-
-    public void SetShouldRaycast(bool state)
+    public class Highlights : MonoBehaviour
     {
-        if (state == true)
-        {
-            myCol.gameObject.layer = 0;//default layer
-        }
-        else if (state == false)
-        {
-            myCol.gameObject.layer = 2;//ignore raycast layer
-        }
-    }
+        internal Collider myCol;
 
+        public void SetShouldRaycast(bool state)
+        {
+            if (state == true)
+            {
+                myCol.gameObject.layer = 8;//accept raycast
+            }
+            else if (state == false)
+            {
+                myCol.gameObject.layer = 9;//ignore raycast layer
+            }
+        }
+
+    }
 }

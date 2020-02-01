@@ -1,46 +1,60 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
-public class Stone : Highlights
+namespace Tak
 {
-    RaycastHit hit;
-
-    [SerializeField]
-    IntReference CurrentPlayer;
-
-    public Material Selected;
-    public Material PlayerOneMat;
-    public Material PlayerTwoMat;
-    Material Deselected = null;
-
-    // Start is called before the first frame update
-    void Start()
+    [ExecuteInEditMode]
+    public class Stone : Highlights
     {
-        myCol = GetComponent<Collider>();
-        Deselected = null;
-    }
+        RaycastHit hit;
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (Deselected == null)
+        [SerializeField]
+        IntReference CurrentPlayer;
+
+        public Material Selected;
+        public Material PlayerOneMat;
+        public Material PlayerTwoMat;
+        Material Deselected = null;
+
+        // Start is called before the first frame update
+        void Start()
         {
-            if (transform.parent.name.Contains("One"))
-            {
-                Deselected = PlayerOneMat;
-            }
-            else if (transform.parent.name.Contains("Two"))
-            {
-                Deselected = PlayerTwoMat;
-            }
-
+            myCol = GetComponent<Collider>();
+            Deselected = null;
         }
-        else
+
+        // Update is called once per frame
+        void Update()
+        {
+            if (Deselected == null)
+            {
+                if (transform.parent.name.Contains("One"))
+                {
+                    Deselected = PlayerOneMat;
+                }
+                else if (transform.parent.name.Contains("Two"))
+                {
+                    Deselected = PlayerTwoMat;
+                }
+
+            }
+            else
+            {
+                //don't do raycast stuff in editor
+                if (!EditorApplication.isPlayingOrWillChangePlaymode)
+                    return;
+                else
+                    RaycastForInput();
+            }
+        }
+
+        void RaycastForInput()
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-            if (Physics.Raycast(ray, out hit, 100.0f))
+            if (Physics.Raycast(ray, out hit, 100.0f, TakGameManager.inputMask))
             {
                 //print("hitting " + hit.collider.name);
                 if (hit.collider.gameObject == gameObject)

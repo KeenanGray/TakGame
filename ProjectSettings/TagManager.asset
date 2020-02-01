@@ -17,8 +17,8 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
+  - TargetableSquare
+  - NonTargetableSquare
   - 
   - 
   - 
