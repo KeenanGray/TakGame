@@ -9,9 +9,6 @@ namespace Tak
         RaycastHit hit;
 
         [SerializeField]
-        IntReference iref_BoardSize;
-
-        [SerializeField]
         Material[] SquareMats = new Material[2];
 
         [SerializeField]
@@ -23,22 +20,12 @@ namespace Tak
         // Start is called before the first frame update
         void Start()
         {
-
+            Selected = DiamondMats[0];
+            Deselected = DiamondMats[1];
             transform.localScale = new Vector3(1, 1, 1);
-            if (iref_BoardSize.Value % 2 != 0)
-            {
-                Selected = DiamondMats[0];
-                Deselected = DiamondMats[1];
-                transform.GetChild(0).localScale = new Vector3(0.01875f, .025f, .25f);
-            }
-            else
-            {
-                Selected = SquareMats[0];
-                Deselected = SquareMats[1];
-                transform.GetChild(0).localScale = new Vector3(0.0375f, .0375f, 0.15f);
-            }
+
             quadCollider = transform.GetChild(0).gameObject;
-            myCol = quadCollider.GetComponent<MeshCollider>();
+            myCol = quadCollider.GetComponent<BoxCollider>();
         }
 
         // Update is called once per frame
@@ -74,6 +61,7 @@ namespace Tak
                 yPos = (transform.GetChild(i).GetSiblingIndex() - 1) * stoneOffset;
                 transform.GetChild(i).localPosition = new Vector3(0, yPos, 0);
                 transform.GetChild(i).GetComponent<Highlights>().SetShouldRaycast(true);
+                transform.GetChild(i).eulerAngles = new Vector3(0, 0, 0);
             }
         }
     }

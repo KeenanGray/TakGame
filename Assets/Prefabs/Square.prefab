@@ -44,10 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3619bae6dcb34dbcb5feb9aeb674ec0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  iref_BoardSize:
-    UseConstant: 0
-    ConstantValue: 0
-    Variable: {fileID: 11400000, guid: 2a1947b6923664ae18afb312ce441cd0, type: 2}
   SquareMats:
   - {fileID: 2100000, guid: 60d4e9f3c076d4ae5af6568db24b54af, type: 2}
   - {fileID: 2100000, guid: c9a2e8c995b214f98b516b54d24f57d4, type: 2}
@@ -65,7 +61,7 @@ GameObject:
   - component: {fileID: 2911912626487533011}
   - component: {fileID: 8445786468911193624}
   - component: {fileID: 6467311876121801228}
-  - component: {fileID: 8731337171700742630}
+  - component: {fileID: 1663421106174211894}
   m_Layer: 0
   m_Name: Quad
   m_TagString: Untagged
@@ -82,7 +78,7 @@ Transform:
   m_GameObject: {fileID: 8354772127744464507}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.025, y: 0.025, z: 0.1}
+  m_LocalScale: {x: 0.025, y: 0.05, z: 0.1}
   m_Children: []
   m_Father: {fileID: 2894316950629089697}
   m_RootOrder: 0
@@ -133,8 +129,8 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!64 &8731337171700742630
-MeshCollider:
+--- !u!65 &1663421106174211894
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -143,7 +139,6 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Convex: 1
-  m_CookingOptions: 14
-  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1.0000002, z: 6.123235e-17}
+  m_Center: {x: 0, y: 0, z: 0}

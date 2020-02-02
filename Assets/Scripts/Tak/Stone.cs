@@ -19,16 +19,18 @@ namespace Tak
         Material Deselected = null;
 
         // Start is called before the first frame update
-        void Start()
+        void Awake()
         {
             myCol = GetComponent<Collider>();
-            Deselected = null;
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-            if (Deselected == null)
+            if (transform.CompareTag("0"))
+            {
+                Deselected = PlayerOneMat;
+            }
+            else if (transform.CompareTag("1"))
+            {
+                Deselected = PlayerTwoMat;
+            }
+            try
             {
                 if (transform.parent.name.Contains("One"))
                 {
@@ -38,16 +40,17 @@ namespace Tak
                 {
                     Deselected = PlayerTwoMat;
                 }
+            }
+            catch
+            {
 
             }
-            else
-            {
-                //don't do raycast stuff in editor
-                if (!EditorApplication.isPlayingOrWillChangePlaymode)
-                    return;
-                else
-                    RaycastForInput();
-            }
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+            RaycastForInput();
         }
 
         void RaycastForInput()
@@ -56,19 +59,19 @@ namespace Tak
 
             if (Physics.Raycast(ray, out hit, 100.0f, TakGameManager.inputMask))
             {
-                //print("hitting " + hit.collider.name);
                 if (hit.collider.gameObject == gameObject)
                 {
-                    GetComponentInChildren<MeshRenderer>().material = Selected;
+                    //print("hitting " + hit.collider.name);
+                    GetComponent<MeshRenderer>().material = Selected;
                 }
                 else
                 {
-                    GetComponentInChildren<MeshRenderer>().material = Deselected;
+                    GetComponent<MeshRenderer>().material = Deselected;
                 }
             }
             else
             {
-                GetComponentInChildren<MeshRenderer>().material = Deselected;
+                GetComponent<MeshRenderer>().material = Deselected;
             }
         }
     }

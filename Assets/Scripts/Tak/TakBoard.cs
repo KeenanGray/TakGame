@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Tak
 {
-    public enum BoardSize
+    public enum BoardSizeNames
     {
         three,
         four,
@@ -19,11 +19,14 @@ namespace Tak
 
     public class TakBoard : MonoBehaviour
     {
+        [SerializeField]
+        float[] sizes = new float[4] { 0.018f, 0.02f, 0.02f, 0.02f };
+
         float offset = 0.042f;
 
-        [SerializeField]
+        //  [SerializeField]
         [Range(0, 1.0f)]
-        float trayOffset = 0.001f;
+        float trayOffset = 0.01f;
 
         [SerializeField]
         BoardSizeProperty BoardSize;
@@ -56,8 +59,6 @@ namespace Tak
 
             boardTilesPool = transform.Find(boardTilesPoolName);
             board = transform.Find(boardName);
-
-            offset = 0.042f;
         }
 
         // Update is called once per frame
@@ -98,7 +99,16 @@ namespace Tak
 
             for (int j = 0; j < numSqares; j++)
             {
+                if (BoardSize.getSize() % 2 != 0)
+                {
+                    board.transform.GetChild(j).GetChild(0).localScale = new Vector3(sizes[0], sizes[1], 1);
+                }
+                else
+                {
+                    board.transform.GetChild(j).GetChild(0).localScale = new Vector3(sizes[2], sizes[3], 1);
+                }
                 board.transform.GetChild(j).transform.localPosition = new Vector3(x, 0, y);
+
 
                 if (j % (size) == 0 && j > 0)
                 {
@@ -120,7 +130,7 @@ namespace Tak
             for (int i = 0; i < squares.Length; i++)
             {
                 squares[i].gameObject.transform.SetParent(parent.transform);
-                squares[i].transform.position = new Vector3(0, 0, 0);
+                squares[i].transform.localPosition = new Vector3(0, 0, 0);
                 squares[i].transform.eulerAngles = new Vector3(0, 0, 0);
                 squares[i].transform.eulerAngles = new Vector3(0.025f, .025f, 0);
             }
@@ -133,7 +143,7 @@ namespace Tak
             for (int j = 0; j < stones.Length; j++)
             {
                 stones[j].gameObject.transform.SetParent(parent.transform);
-                stones[j].transform.position = new Vector3(0, 0, 0);
+                stones[j].transform.localPosition = new Vector3(0, 0, 0);
                 stones[j].transform.eulerAngles = new Vector3(0, 0, 0);
                 stones[j].transform.eulerAngles = new Vector3(0.025f, .025f, 0);
             }
@@ -248,6 +258,11 @@ namespace Tak
             return null;
 
         }
+
+        public BoardSizeProperty GetBoardSizeProperty()
+        {
+            return BoardSize;
+        }
     }
 
     [CustomPropertyDrawer(typeof(BoardSizeProperty))]
@@ -282,17 +297,14 @@ namespace Tak
             // Set indent back to what it was
             EditorGUI.indentLevel = indent;
 
-
             EditorGUI.EndProperty();
 
             if (EditorGUI.EndChangeCheck())
             {
-                // Debug.Log("property changed");
                 property.serializedObject.ApplyModifiedProperties();
                 property.FindPropertyRelative("i_Size").intValue = (fieldInfo.GetValue(property.serializedObject.targetObject) as BoardSizeProperty).getSize();
                 property.serializedObject.ApplyModifiedProperties();
 
-                //                Debug.Log((fieldInfo.GetValue(property.serializedObject.targetObject) as BoardSizeProperty).getSize());
                 //callback to onproperty changed delegate
                 TakBoard bar = property.serializedObject.targetObject as TakBoard;
                 bar.UpdateBoard((fieldInfo.GetValue(property.serializedObject.targetObject) as BoardSizeProperty).getSize());
@@ -304,7 +316,7 @@ namespace Tak
     public class BoardSizeProperty
     {
         [EnumToString(new String[] { "3x3", "4x4", "5x5", "6x6", "7x7", "8x8" })]
-        public BoardSize size;
+        public BoardSizeNames size;
         public string s_Size;
         public int i_Size;
         public int getSize()
@@ -354,13 +366,6 @@ namespace Tak
             var rect = new Rect(position.position, new Vector2(100, 20));
 
             EditorGUI.EndProperty();
-        }
-
-        private void SetProperty(SerializedProperty property, int v)
-        {
-            property.enumValueIndex = v;
-
-            property.serializedObject.ApplyModifiedProperties();
         }
     }
 

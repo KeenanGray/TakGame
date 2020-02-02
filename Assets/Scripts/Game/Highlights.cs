@@ -10,6 +10,12 @@ namespace Tak
 
         public void SetShouldRaycast(bool state)
         {
+            if (myCol == null)
+            {
+                Debug.LogError("no collider on this highlightable object");
+                return;
+            }
+
             if (state == true)
             {
                 myCol.gameObject.layer = 8;//accept raycast
