@@ -29,10 +29,10 @@ namespace Tak
         float trayOffset = 0.01f;
 
         [SerializeField]
-        BoardSizeProperty BoardSize;
+        public BoardSizeProperty BoardSize;
 
         [SerializeField]
-        IntReference CurrentPlayer;
+        IntReference CurrentPlayer = null;
 
         Transform boardTilesPool;
         string boardTilesPoolName = "SquaresPool";
@@ -69,6 +69,7 @@ namespace Tak
 
         public void UpdateBoard(int size)
         {
+
             ReturnSquaresToPool();
             //ReturnPiecesToPool();
 
@@ -83,7 +84,8 @@ namespace Tak
                 i++;
                 var t = boardTilesPool.GetChild(0).transform;
                 t.SetParent(board);
-                t.transform.localPosition = new Vector3(0, 0, 0.0f);
+                t.GetComponent<Square>().SetTextureAndSize(size);
+                t.transform.localPosition = new Vector3(0, 0.1f, 0.0f);
             }
 
             //arrange the children baybee
@@ -212,6 +214,8 @@ namespace Tak
                 t1.localEulerAngles = new Vector3(0, 0, 0);
                 t1.GetComponent<MeshRenderer>().material = PlayerOneMat;
                 i++;
+
+                t1.GetComponent<Highlights>().SetShouldRaycast(false);
             }
             i = 0;
             //put pieces in player 2 pool
@@ -235,6 +239,7 @@ namespace Tak
                 t2.GetComponent<MeshRenderer>().material = PlayerTwoMat;
 
                 i++;
+                t2.GetComponent<Highlights>().SetShouldRaycast(false);
             }
 
         }

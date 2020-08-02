@@ -5,8 +5,8 @@ using UnityEngine;
 public class CandleFlame : MonoBehaviour
 {
     int seed;
-    public float intensityMax;
     public float intenstityMin;
+    public float intensityMax;
 
     public float minWaitTime;
     public float maxWaitTime;
@@ -27,7 +27,7 @@ public class CandleFlame : MonoBehaviour
 
     IEnumerator FlickerFlame()
     {
-        
+
         float intensity = 0;
         while (true)
         {
