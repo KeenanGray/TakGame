@@ -27,6 +27,7 @@ public class CandleFlame : MonoBehaviour
 
     IEnumerator FlickerFlame()
     {
+        
         float intensity = 0;
         while (true)
         {

@@ -6,7 +6,7 @@ public class CameraManager : MonoBehaviour
 {
     Camera[] Cameras;
     int CurrentCam = 1;
-
+    
     KeyCode ChangeCameraKey = KeyCode.Space;
 
     // Start is called before the first frame update

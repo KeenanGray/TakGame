@@ -163,6 +163,7 @@ namespace Tak
                     movesLeft++;
                     if (stone < Selected.transform.parent.childCount && stone > 0)
                     {
+                        Debug.Log("Selected " + Selected.name);
                         Picked[cur] = Selected.transform.parent.GetChild(stone).gameObject;
                         Picked[cur].transform.localPosition += new Vector3(0, .05f, 0);
                         cur++;
@@ -178,8 +179,16 @@ namespace Tak
                 for (int i = 0; i < boardSpaces.transform.childCount; i++)
                 {
                     //turn off the highlights on all squares
-                    //except the squares we can place on (neighbors).
                     boardSpaces.transform.GetChild(i).GetComponent<Highlights>().SetShouldRaycast(false);
+
+                    // + Children
+                    foreach(Highlights hl in boardSpaces.transform.GetChild(i).GetComponentsInChildren<Highlights>()){
+                        hl.SetShouldRaycast(false);
+                    }
+                    
+                    //Go in and turn on the squares we
+                    //can place on (neighbors).
+
                     if (i == (self + 1) || i == (self - 1) || i == (self + size) || i == (self - size))
                     {
                         var n = self;

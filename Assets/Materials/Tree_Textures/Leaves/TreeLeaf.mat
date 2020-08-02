@@ -21,8 +21,8 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: TreeLeaf
-  m_Shader: {fileID: 4800000, guid: 4799b78ba0452488c954504d8c6a267a, type: 3}
-  m_ShaderKeywords: 
+  m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
+  m_ShaderKeywords: _GLOSSYREFLECTIONS_OFF
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -41,6 +41,18 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpSpecMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailAlbedoMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailNormalMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -68,6 +80,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _ParallaxMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -82,6 +98,7 @@ Material:
     - _BumpScale: 1
     - _Cull: 2
     - _Cutoff: 0.5
+    - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _EnableDither: 0
     - _EnvironmentReflections: 1
@@ -89,7 +106,9 @@ Material:
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _Metallic: 0
+    - _Mode: 0
     - _OcclusionStrength: 1
+    - _Parallax: 0.02
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _ShadowOffsetScale: 1
@@ -102,6 +121,7 @@ Material:
     - _SrcBlend: 1
     - _Surface: 0
     - _TranslucencyViewDependency: 0.7
+    - _UVSec: 0
     - _WindQuality: 0
     - _WorkflowMode: 1
     - _ZWrite: 1

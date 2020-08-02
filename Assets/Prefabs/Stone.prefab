@@ -13,9 +13,9 @@ GameObject:
   - component: {fileID: 8984532327423159737}
   - component: {fileID: 6861175728397858849}
   - component: {fileID: 5374855427856719201}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Stone
-  m_TagString: Untagged
+  m_TagString: 0
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -56,10 +56,11 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 4c9f85bc7982a4540839d7c55316023e, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
