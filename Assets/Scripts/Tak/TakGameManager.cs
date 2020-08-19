@@ -16,6 +16,9 @@ namespace Tak
         [SerializeField]
         BoolReference Picking = null;
 
+        delegate void TilePickedUpEvent();
+        TilePickedUpEvent onTilePickedUp;
+
         [SerializeField]
         IntReference CurrentPlayer = null;
 
@@ -57,22 +60,6 @@ namespace Tak
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-            if (Physics.Raycast(ray, out hit, 100.0f, inputMask))
-            {
-                if (hit.collider.transform.parent.CompareTag("Space"))
-                {
-                    Selected = hit.collider.transform.parent.gameObject;
-                }
-                if (hit.collider.transform.CompareTag("0") || hit.collider.transform.CompareTag("1"))
-                {
-                    Selected = hit.collider.transform.gameObject;
-                }
-            }
-            else
-            {
-                Selected = null;
-            }
-
             if (Input.GetMouseButtonDown(0))
             {
                 if (Selected != null)
@@ -84,6 +71,31 @@ namespace Tak
                     UndoMove();
                 }
             }
+
+            if (Physics.Raycast(ray, out hit, 10.0f, inputMask))
+            {
+                if (hit.Equals(null) || hit.collider.transform.parent == null)
+                    Selected = null;
+
+                if (hit.collider.CompareTag("Untagged"))
+                    Selected = null;
+
+                //Checks if the collider is a "space"
+                if (hit.collider.transform.parent.CompareTag("Space"))
+                {
+                    Selected = hit.collider.transform.parent.gameObject;
+                }
+                //or if the collider is a stone belonging to a player
+                if (hit.collider.transform.CompareTag("0") || hit.collider.transform.CompareTag("1"))
+                {
+                    Selected = hit.collider.transform.parent.gameObject;
+                }
+            }
+            else
+            {
+                Selected = null;
+            }
+
         }
 
         int StackIndex = 0;
@@ -135,12 +147,10 @@ namespace Tak
                         EndPieceMove();
                         ChangePlayer(p);
                     }
-
                     return;
                 }
                 return;
             }
-
 
             //check if we clicked a stone
             if ((Selected.CompareTag("0") || Selected.CompareTag("1")) && !Picking.Value)
@@ -154,16 +164,19 @@ namespace Tak
                 var cur = 0;
                 for (int stone = Selected.transform.GetSiblingIndex(); stone < Selected.transform.parent.childCount; stone += 1)
                 {
-
+                    //Set that we are moving a piece
                     Picking.Value = true;
+
+                    if (onTilePickedUp != null)
+                        onTilePickedUp();
+
                     LiftedFromSquare = Selected.transform.parent.gameObject;
                     ogSquare = Selected.transform.parent;
 
-                    //There is no errory checking here that the differnece will be less than 5 but *Shrug*
+                    //Pick up all the stones in the stack.
                     movesLeft++;
                     if (stone < Selected.transform.parent.childCount && stone > 0)
                     {
-                        Debug.Log("Selected " + Selected.name);
                         Picked[cur] = Selected.transform.parent.GetChild(stone).gameObject;
                         Picked[cur].transform.localPosition += new Vector3(0, .05f, 0);
                         cur++;
@@ -182,14 +195,23 @@ namespace Tak
                     boardSpaces.transform.GetChild(i).GetComponent<Highlights>().SetShouldRaycast(false);
 
                     // + Children
-                    foreach(Highlights hl in boardSpaces.transform.GetChild(i).GetComponentsInChildren<Highlights>()){
+                    foreach (Highlights hl in boardSpaces.transform.GetChild(i).GetComponentsInChildren<Highlights>())
+                    {
                         hl.SetShouldRaycast(false);
                     }
-                    
+
                     //Go in and turn on the squares we
                     //can place on (neighbors).
+                    var n1 = self + 1;
+                    var n2 = self - 1;
+                    var n3 = self + size;
+                    var n4 = self - size;
+                    //A literal edge case!
+                    if (self % size == 0)
+                        n2 = 0;
 
-                    if (i == (self + 1) || i == (self - 1) || i == (self + size) || i == (self - size))
+                    Debug.Log(n1 + ", " + n2 + ", " + n3 + " " + n4);
+                    if (i == n1 || i == n2 || i == n3 || i == n4)
                     {
                         var n = self;
                         for (int num = 0; num < 4; num++)
@@ -197,19 +219,19 @@ namespace Tak
                             switch (num)
                             {
                                 case 0:
-                                    n = self - 1;
+                                    n = n1;
                                     break;
                                 case 1:
-                                    n = self + 1;
+                                    n = n2;
                                     break;
                                 case 2:
-                                    n = self - size;
+                                    n = n3;
                                     break;
                                 case 3:
-                                    n = self + size;
+                                    n = n4;
                                     break;
                             }
-                            if (n < boardSpaces.transform.childCount && n > 0)
+                            if (n < boardSpaces.transform.childCount && n >= 0)
                             {
                                 var currentNeighbor = boardSpaces.transform.GetChild(n);
                                 if (currentNeighbor != null)
@@ -219,10 +241,27 @@ namespace Tak
                                         currentNeighbor.GetComponent<Highlights>().SetShouldRaycast(true);
                                     else
                                     {
-                                        //set each sibling of this object to raycast instead
+                                        //set just the top stone to raycast
                                         for (int sibling = 1; sibling < currentNeighbor.childCount; sibling++)
                                         {
-                                            currentNeighbor.GetChild(sibling).GetComponent<Highlights>().SetShouldRaycast(true);
+                                            //check if the top piece is a flatstone, otherwise we can't place here.
+                                            try
+                                            {
+                                                //child (childcount-1) is the top stone
+                                                if (currentNeighbor.GetChild(currentNeighbor.childCount - 1).GetComponent<Stone>().Stonetype == Stonetype.FlatStone
+                                                || (currentNeighbor.GetChild(currentNeighbor.childCount - 1).GetComponent<Stone>().Stonetype == Stonetype.StandingStone
+                                                && Selected.GetComponent<Stone>().Stonetype == Stonetype.CapStone && Selected.transform.GetComponentsInChildren<Stone>().Length == 1))
+                                                {
+                                                    //long if statement above checks if neighbors are flatstones, that a neighbor is a standing stone and we have selected a capstone
+                                                    currentNeighbor.GetChild(currentNeighbor.childCount - 1).GetComponentInChildren<Highlights>().SetShouldRaycast(true);
+                                                }
+                                            }
+                                            catch (Exception e)
+                                            {
+                                                if (e.GetType() == typeof(NullReferenceException))
+                                                {
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -241,6 +280,9 @@ namespace Tak
             //we are placing on a selected space
             if (Selected.CompareTag("Space") && !Picking.Value)
             {
+                var radioSelected = GameObject.FindObjectOfType<RadioButtonContainer>().selected;
+                Stonetype t = (Stonetype)radioSelected.transform.GetSiblingIndex();
+
                 //can't place on a square that already has a child
                 //squares have a quad below them so we compare against 1
                 if (Selected.transform.childCount != 1)
@@ -249,16 +291,15 @@ namespace Tak
                 }
                 if (p == 0)
                 {
-                    PlaceOnTile(board.GetComponent<TakBoard>().GetPiece(), 0);
+                    PlaceOnTile(board.GetComponent<TakBoard>().GetPiece(), 0, t);
                 }
                 else if (p == 1)
                 {
-                    PlaceOnTile(board.GetComponent<TakBoard>().GetPiece(), 1);
+                    PlaceOnTile(board.GetComponent<TakBoard>().GetPiece(), 1, t);
                 }
                 ChangePlayer(p);
                 return;
             }
-
         }
 
         private Direction CalculateDir(GameObject liftedSquare, GameObject selected)
@@ -272,7 +313,6 @@ namespace Tak
             LiftedFromSquare = t.gameObject;
 
             var diff = liftedSquare.transform.GetSiblingIndex() - t.GetSiblingIndex();
-
             if (diff == -boardWidth)
             {
                 return Direction.North;
@@ -289,7 +329,7 @@ namespace Tak
             {
                 return Direction.West;
             }
-            //  Debug.LogError("Problem here");
+            Debug.LogError("Problem here");
             if (lastDir != Direction.None)
                 return lastDir;
             else
@@ -359,7 +399,7 @@ namespace Tak
                 {
                     for (int sibling = 1; sibling < curSquare.transform.childCount; sibling++)
                     {
-                        curSquare.GetChild(sibling).GetComponent<Highlights>().SetShouldRaycast(false);
+                        curSquare.GetChild(sibling).GetComponentInChildren<Highlights>().SetShouldRaycast(false);
                     }
                 }
 
@@ -377,7 +417,7 @@ namespace Tak
                         {
                             if (curSquare.GetChild(sibling) != null)
                             {
-                                curSquare.GetChild(sibling).GetComponent<Highlights>().SetShouldRaycast(true);
+                                curSquare.GetChild(sibling).GetComponentInChildren<Highlights>().SetShouldRaycast(true);
                             }
                         }
                     }
@@ -385,13 +425,17 @@ namespace Tak
             }
         }
 
-        void PlaceOnTile(GameObject stone, int p)
+        void PlaceOnTile(GameObject stone, int p, Stonetype type)
         {
             stone.transform.SetParent(Selected.transform);
+            stone.GetComponentInChildren<Stone>().Stonetype = type;
 
             stone.transform.localEulerAngles = new Vector3(0, 0, 0);
+
             stone.transform.localPosition = new Vector3(0, 0, 0);
             stone.transform.tag = p.ToString();
+            stone.transform.GetChild(0).tag = p.ToString();
+
 
             ChangePlayer(p);
         }
@@ -421,14 +465,13 @@ namespace Tak
             var boardWidth = board.GetComponent<TakBoard>().GetBoardSizeProperty().getSize();
 
             //turn off other squares
-
             foreach (Highlights h in GameObject.FindObjectsOfType<Highlights>())
             {
                 h.SetShouldRaycast(false);
             }
 
             //get each neighbor square and set them raycastable
-            var parent = square.parent;
+            var prnt = square.parent;
             var index = square.GetSiblingIndex();
 
             int nextChild = -1;
@@ -442,7 +485,6 @@ namespace Tak
                 case Direction.East:
                     nextChild = index + 1;
                     prevChild = index - 1;
-
                     break;
                 case Direction.South:
                     nextChild = index - boardWidth;
@@ -454,13 +496,11 @@ namespace Tak
                     break;
             }
 
-            if (nextChild >= 0 && nextChild < parent.childCount)
+            if (nextChild >= 0 && nextChild < prnt.childCount)
             {
-                // parent.GetChild(nextChild).GetChild(childCount - 1).GetComponent<Highlights>().SetShouldRaycast(true);
-
-                foreach (Highlights h in parent.GetChild(nextChild).GetComponentsInChildren<Highlights>())
+                foreach (Highlights h in prnt.GetChild(nextChild).GetComponentsInChildren<Highlights>())
                 {
-                    parent.GetChild(nextChild).GetComponent<Highlights>().SetShouldRaycast(true);
+                    prnt.GetChild(nextChild).GetComponent<Highlights>().SetShouldRaycast(true);
                     h.SetShouldRaycast(true);
                 }
             }

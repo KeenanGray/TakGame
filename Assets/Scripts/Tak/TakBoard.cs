@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
-using UnityEditor.Graphs;
 using UnityEngine;
 
 namespace Tak
@@ -71,7 +70,7 @@ namespace Tak
         {
 
             ReturnSquaresToPool();
-            //ReturnPiecesToPool();
+            ReturnPiecesToPool();
 
             boardTilesPool = GameObject.Find(boardTilesPoolName).transform;
             board = GameObject.Find(boardName).transform;
@@ -140,11 +139,11 @@ namespace Tak
 
         public void ReturnPiecesToPool()
         {
-            var parent = GameObject.Find("Stones");
+            var prnt = GameObject.Find("Stones");
             var stones = GameObject.FindObjectsOfType<Stone>();
             for (int j = 0; j < stones.Length; j++)
             {
-                stones[j].gameObject.transform.SetParent(parent.transform);
+                stones[j].gameObject.transform.SetParent(prnt.transform);
                 stones[j].transform.localPosition = new Vector3(0, 0, 0);
                 stones[j].transform.eulerAngles = new Vector3(0, 0, 0);
                 stones[j].transform.eulerAngles = new Vector3(0.025f, .025f, 0);
@@ -185,19 +184,12 @@ namespace Tak
             var init = 0f;
 
             //put pieces in player 1 pool
-            Material PlayerOneMat = Resources.Load("Pieces/SideOneMat") as Material;
-            Material PlayerTwoMat = Resources.Load("Pieces/SideTwoMat") as Material;
+            Material PlayerOneMat = Resources.Load("Materials/SideOneMat") as Material;
+            Material PlayerTwoMat = Resources.Load("Materials/SideTwoMat") as Material;
             while (i < number)
             {
                 Transform t1 = null;
-                try
-                {
-                    t1 = parent.transform.GetChild(0).transform;
-                }
-                catch
-                {
-                    break;
-                }
+                t1 = prnt.transform.GetChild(0).transform;
                 t1.SetParent(PlayerOnePool);
 
                 //only move it if we have room in the tray
@@ -212,16 +204,16 @@ namespace Tak
                 }
 
                 t1.localEulerAngles = new Vector3(0, 0, 0);
-                t1.GetComponent<MeshRenderer>().material = PlayerOneMat;
+                t1.GetComponentInChildren<MeshRenderer>().material = PlayerOneMat;
                 i++;
 
-                t1.GetComponent<Highlights>().SetShouldRaycast(false);
+                t1.GetComponentInChildren<Highlights>().SetShouldRaycast(false);
             }
             i = 0;
             //put pieces in player 2 pool
             while (i < number)
             {
-                var t2 = parent.transform.GetChild(1).transform;
+                var t2 = prnt.transform.GetChild(0).transform;
                 t2.SetParent(PlayerTwoPool);
 
                 //only move it if we have room in the tray
@@ -236,10 +228,10 @@ namespace Tak
                 }
 
                 t2.localEulerAngles = new Vector3(0, 0, 0);
-                t2.GetComponent<MeshRenderer>().material = PlayerTwoMat;
+                t2.GetComponentInChildren<MeshRenderer>().material = PlayerTwoMat;
 
                 i++;
-                t2.GetComponent<Highlights>().SetShouldRaycast(false);
+                t2.GetComponentInChildren<Highlights>().SetShouldRaycast(false);
             }
 
         }
@@ -269,7 +261,7 @@ namespace Tak
             return BoardSize;
         }
     }
-
+#if UNITY_EDITOR
     [CustomPropertyDrawer(typeof(BoardSizeProperty))]
     public class BoardSizePropertyDrawer : PropertyDrawer
     {
@@ -316,6 +308,7 @@ namespace Tak
             }
         }
     }
+#endif
 
     [Serializable]
     public class BoardSizeProperty
@@ -340,6 +333,7 @@ namespace Tak
         }
     }
 
+#if UNITY_EDITOR
     [CustomPropertyDrawer(typeof(EnumToString))]
     public class EnumToStringDrawer : PropertyDrawer
     {
@@ -373,6 +367,6 @@ namespace Tak
             EditorGUI.EndProperty();
         }
     }
-
+#endif
 }
 

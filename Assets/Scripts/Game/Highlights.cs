@@ -8,13 +8,19 @@ namespace Tak
     {
         internal Collider myCol;
 
+        internal void Init()
+        {      
+            SetShouldRaycast(false);
+        }
+        
         public void SetShouldRaycast(bool state)
         {
             if (myCol == null)
             {
-                Debug.LogError("no collider on this highlightable object");
+                Debug.LogError("no collider on this highlightable object" + name);
                 return;
             }
+            
 
             if (state == true)
             {

@@ -24,6 +24,8 @@ namespace Tak
 
             quadCollider = transform.GetChild(0).gameObject;
             myCol = quadCollider.GetComponent<BoxCollider>();
+            
+            Init();
         }
 
         // Update is called once per frame
@@ -33,6 +35,9 @@ namespace Tak
 
             if (Physics.Raycast(ray, out hit, 100.0f, TakGameManager.inputMask))
             {
+                if (hit.collider == null || hit.collider.transform.parent == null)
+                    return;
+
                 if (hit.collider.transform.parent.gameObject == gameObject && hit.collider.CompareTag("Space"))
                 {
                     //only do this if no piece is on top
@@ -58,7 +63,7 @@ namespace Tak
                 float stoneOffset = 0.006f;
                 yPos = (transform.GetChild(i).GetSiblingIndex() - 1) * stoneOffset;
                 transform.GetChild(i).localPosition = new Vector3(0, yPos, 0);
-                transform.GetChild(i).GetComponent<Highlights>().SetShouldRaycast(true);
+                transform.GetChild(i).GetComponentInChildren<Highlights>().SetShouldRaycast(true);
                 transform.GetChild(i).eulerAngles = new Vector3(0, 0, 0);
             }
         }

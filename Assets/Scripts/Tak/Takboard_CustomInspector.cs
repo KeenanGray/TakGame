@@ -4,11 +4,13 @@ using UnityEngine;
 
 namespace Tak
 {
+#if UNITY_EDITOR
     [CustomEditor(typeof(TakBoard))]
     public class Takboard_CustomInspector : Editor
     {
         public int selGridInt = 0;
         public string[] selStrings;
+        int NumberOfMoves;
 
         public override void OnInspectorGUI()
         {
@@ -62,11 +64,20 @@ namespace Tak
             }
 
 
-
             if (GUILayout.Button("Reset", GUILayout.Width(100), GUILayout.Height(33)))
             {
                 ResetBoard();
             }
+
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("Random Board", GUILayout.Width(100), GUILayout.Height(33)))
+            {
+                RandomBoard(NumberOfMoves);
+            }
+            EditorGUILayout.LabelField("Number Of Moves");
+            NumberOfMoves = EditorGUILayout.IntField(NumberOfMoves);
+
+            EditorGUILayout.EndHorizontal();
 
             if (EditorGUI.EndChangeCheck())
             {
@@ -92,8 +103,11 @@ namespace Tak
             TakBoard board = ((TakBoard)target);
             var stone = board.GetPiece();
             stone.transform.tag = current.Value.ToString();
+            stone.transform.GetChild(0).tag = current.Value.ToString();
+
             var square = board.transform.GetChild(0).GetChild(index);
             stone.transform.SetParent(square);
+            stone.transform.localEulerAngles = new Vector3(0, 0, 0);
             stone.SendMessageUpwards("RedoHeights");
         }
 
@@ -103,7 +117,21 @@ namespace Tak
             board.ReturnPiecesToPool();
         }
 
+        public void RandomBoard(int NumberOfMoves)
+        {
+            TakBoard board = ((TakBoard)target);
+            int size = board.GetBoardSizeProperty().getSize();
+            var playerProp = EditorGUIHelpers.GetTargetObjectOfProperty(serializedObject.FindProperty("CurrentPlayer"));
+            IntReference curPlayer = (IntReference)playerProp;
 
+            for (int i = 0; i < NumberOfMoves; i++)
+            {
+                int space = UnityEngine.Random.Range(0, (int)Mathf.Pow(size, 2));
+                MoveStoneHere(space, curPlayer);
+                SwitchPlayer(curPlayer);
+            }
+        }
     }
+#endif
 }
 

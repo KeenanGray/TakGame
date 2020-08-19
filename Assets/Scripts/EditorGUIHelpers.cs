@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class EditorGUIHelpers
 {
+#if UNITY_EDITOR
     public static object GetTargetObjectOfProperty(SerializedProperty prop)
     {
         if (prop == null) return null;
@@ -65,5 +66,6 @@ public class EditorGUIHelpers
         }
         return enm.Current;
     }
+#endif
 }
 
