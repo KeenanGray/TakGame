@@ -5,9 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - Space
+  - 1
   - HideIfLarge
   - 0
-  - 1
   layers:
   - Default
   - TransparentFX
@@ -17,10 +17,10 @@ TagManager:
   - UI
   - 
   - 
-  - TargetableSquare
-  - NonTargetableSquare
-  - PostProcess
-  - PostProcessaTopDown
+  - Accept Raycast
+  - Ignore Raycast
+  - 
+  - 
   - 
   - 
   - 

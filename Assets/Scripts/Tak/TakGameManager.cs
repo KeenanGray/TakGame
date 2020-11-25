@@ -17,7 +17,10 @@ namespace Tak
         BoolReference Picking = null;
 
         delegate void TilePickedUpEvent();
-        TilePickedUpEvent onTilePickedUp;
+        TilePickedUpEvent onTilePickedUp = null;
+
+        delegate void TurnFinished();
+        TurnFinished onTurnFinished = null;
 
         [SerializeField]
         IntReference CurrentPlayer = null;
@@ -53,6 +56,9 @@ namespace Tak
             board = GameObject.Find("GameBoard");
 
             ResetRaycasts();
+
+            CurrentPlayer.Value = 0;
+            onTurnFinished += RadioButtonReset;
         }
 
         // Update is called once per frame
@@ -75,10 +81,16 @@ namespace Tak
             if (Physics.Raycast(ray, out hit, 10.0f, inputMask))
             {
                 if (hit.Equals(null) || hit.collider.transform.parent == null)
+                {
                     Selected = null;
+                    return;
+                }
 
                 if (hit.collider.CompareTag("Untagged"))
+                {
                     Selected = null;
+                    return;
+                }
 
                 //Checks if the collider is a "space"
                 if (hit.collider.transform.parent.CompareTag("Space"))
@@ -146,6 +158,8 @@ namespace Tak
                     {
                         EndPieceMove();
                         ChangePlayer(p);
+                        onTurnFinished.Invoke();
+
                     }
                     return;
                 }
@@ -210,7 +224,7 @@ namespace Tak
                     if (self % size == 0)
                         n2 = 0;
 
-                    Debug.Log(n1 + ", " + n2 + ", " + n3 + " " + n4);
+                    //                    Debug.Log(n1 + ", " + n2 + ", " + n3 + " " + n4);
                     if (i == n1 || i == n2 || i == n3 || i == n4)
                     {
                         var n = self;
@@ -298,6 +312,8 @@ namespace Tak
                     PlaceOnTile(board.GetComponent<TakBoard>().GetPiece(), 1, t);
                 }
                 ChangePlayer(p);
+                onTurnFinished.Invoke();
+
                 return;
             }
         }
@@ -329,7 +345,7 @@ namespace Tak
             {
                 return Direction.West;
             }
-            Debug.LogError("Problem here");
+
             if (lastDir != Direction.None)
                 return lastDir;
             else
@@ -427,17 +443,14 @@ namespace Tak
 
         void PlaceOnTile(GameObject stone, int p, Stonetype type)
         {
+            stone.transform.tag = p.ToString();
             stone.transform.SetParent(Selected.transform);
             stone.GetComponentInChildren<Stone>().Stonetype = type;
 
             stone.transform.localEulerAngles = new Vector3(0, 0, 0);
 
             stone.transform.localPosition = new Vector3(0, 0, 0);
-            stone.transform.tag = p.ToString();
             stone.transform.GetChild(0).tag = p.ToString();
-
-
-            ChangePlayer(p);
         }
 
         void EndPieceMove()
@@ -452,6 +465,8 @@ namespace Tak
             for (int i = 0; i < Picked.Length; i++)
                 Picked[i] = null;//set the moved stone to null since we no longer have it selected.
             StackIndex = 0;
+
+            //change the selected piece back to flatstone for convenience
             ResetRaycasts();
         }
 
@@ -514,6 +529,11 @@ namespace Tak
         {
 
             return (movesLeft == 0); //down here all picked objects are null so turn is done
+        }
+
+        void RadioButtonReset()
+        {
+            GameObject.FindObjectOfType<RadioButtonContainer>().ChangeButtonWithInt(0);
         }
     }
 }

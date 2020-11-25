@@ -16,6 +16,13 @@ namespace Tak
         eight
     };
 
+    public struct PlayerPieces
+    {
+        int Flatstones;
+        int Standingstones;
+        int Capstone;
+    }
+
     public class TakBoard : MonoBehaviour
     {
         [SerializeField]
@@ -41,23 +48,20 @@ namespace Tak
         GameObject PlayerOnePool;
         GameObject PlayerTwoPool;
 
+        public PlayerPieces playerOnePieces;
+        public PlayerPieces playerTwoPieces;
+
         public delegate void OnBoardSizeChanged(int BoardSize);
         public static OnBoardSizeChanged OnBoardSizeChangedDelegate;
 
         // Start is called before the first frame update
         void Start()
         {
-            if (Application.isPlaying)
-            {
-                Debug.Log("Play Mode");
-            }
-            else
-            {
-                Debug.Log("Edit Mode");
-            }
-
             boardTilesPool = transform.Find(boardTilesPoolName);
             board = transform.Find(boardName);
+
+            SetUpBoard(BoardSize.i_Size);
+            ReturnPiecesToPool();
         }
 
         // Update is called once per frame
@@ -66,9 +70,8 @@ namespace Tak
 
         }
 
-        public void UpdateBoard(int size)
+        public void SetUpBoard(int size)
         {
-
             ReturnSquaresToPool();
             ReturnPiecesToPool();
 
@@ -110,7 +113,6 @@ namespace Tak
                 }
                 board.transform.GetChild(j).transform.localPosition = new Vector3(x, 0, y);
 
-
                 if (j % (size) == 0 && j > 0)
                 {
                     y += offset;
@@ -120,6 +122,7 @@ namespace Tak
                 k++;
                 board.transform.GetChild(j).transform.localPosition = StartPos + new Vector3(x, 0, y);
                 board.transform.GetChild(j).name = "Square " + (j);
+                board.transform.GetChild(j).GetComponent<Highlights>().SetShouldRaycast(true);
             }
         }
 
@@ -184,10 +187,14 @@ namespace Tak
             var init = 0f;
 
             //put pieces in player 1 pool
-            Material PlayerOneMat = Resources.Load("Materials/SideOneMat") as Material;
-            Material PlayerTwoMat = Resources.Load("Materials/SideTwoMat") as Material;
+            // Material PlayerOneMat = Resources.Load("Materials/SideOneMat") as Material;
+            // Material PlayerTwoMat = Resources.Load("Materials/SideTwoMat") as Material;
+
             while (i < number)
             {
+                if (prnt.transform.childCount <= 0)
+                    return;
+
                 Transform t1 = null;
                 t1 = prnt.transform.GetChild(0).transform;
                 t1.SetParent(PlayerOnePool);
@@ -204,7 +211,6 @@ namespace Tak
                 }
 
                 t1.localEulerAngles = new Vector3(0, 0, 0);
-                t1.GetComponentInChildren<MeshRenderer>().material = PlayerOneMat;
                 i++;
 
                 t1.GetComponentInChildren<Highlights>().SetShouldRaycast(false);
@@ -228,7 +234,6 @@ namespace Tak
                 }
 
                 t2.localEulerAngles = new Vector3(0, 0, 0);
-                t2.GetComponentInChildren<MeshRenderer>().material = PlayerTwoMat;
 
                 i++;
                 t2.GetComponentInChildren<Highlights>().SetShouldRaycast(false);
@@ -304,7 +309,7 @@ namespace Tak
 
                 //callback to onproperty changed delegate
                 TakBoard bar = property.serializedObject.targetObject as TakBoard;
-                bar.UpdateBoard((fieldInfo.GetValue(property.serializedObject.targetObject) as BoardSizeProperty).getSize());
+                bar.SetUpBoard((fieldInfo.GetValue(property.serializedObject.targetObject) as BoardSizeProperty).getSize());
             }
         }
     }

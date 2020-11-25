@@ -15,12 +15,13 @@ public class CameraManager : MonoBehaviour
         Cameras = GameObject.Find("Camera Container").GetComponentsInChildren<Camera>();
 
         Cameras[0].gameObject.SetActive(true);
-        Cameras[1].gameObject.SetActive(false);
+       // Cameras[1].gameObject.SetActive(false);
     }
 
     // Update is called once per frame
     void Update()
     {
+        /*
         if (Input.GetKeyDown(ChangeCameraKey))
         {
             Cameras[CurrentCam].gameObject.SetActive(false);
@@ -34,6 +35,8 @@ public class CameraManager : MonoBehaviour
                     break;
             }
             Cameras[CurrentCam].gameObject.SetActive(true);
+            
         }
+        */
     }
 }

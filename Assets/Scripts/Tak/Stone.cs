@@ -18,59 +18,41 @@ namespace Tak
 
         [SerializeField]
         IntReference CurrentPlayer;
-
-        public Material Selected;
-        public Material PlayerOneMat;
-        public Material PlayerTwoMat;
-
         public Stonetype Stonetype;
         Stonetype LastStonetype;
 
         public delegate void StoneTypeChanged();
         public StoneTypeChanged OnStoneTypeChanged;
 
-        Material Deselected = null;
+        [SerializeField]
+        Palette palette;
+
+        MeshRenderer mesh;
+
+        List<Material> _materials;
 
         public Mesh[] StoneMeshes;
-        // Start is called before the first frame update
         void Awake()
         {
             myCol = GetComponentInChildren<Collider>();
             Init();
 
-            if (transform.CompareTag("0"))
-            {
-                Deselected = PlayerOneMat;
-            }
-            else if (transform.CompareTag("1"))
-            {
-                Deselected = PlayerTwoMat;
-            }
-            try
-            {
-                if (transform.parent.name.Contains("One"))
-                {
-                    Deselected = PlayerOneMat;
-                }
-                else if (transform.parent.name.Contains("Two"))
-                {
-                    Deselected = PlayerTwoMat;
-                }
-            }
-            catch
-            {
-
-            }
+            mesh = GetComponentInChildren<MeshRenderer>();
 
             OnStoneTypeChanged += ChangeStoneTypeModel;
             LastStonetype = Stonetype;
         }
 
+        void Start()
+        {
+            _materials = new List<Material>();
+            GetComponentInChildren<MeshRenderer>().GetMaterials(_materials);
+        }
+
         void ChangeStoneTypeModel()
         {
-            Debug.Log("new Stone Type " + Stonetype);
             var stoneModel = transform.GetChild(0);
-            float height = stoneModel.GetComponent<MeshRenderer>().bounds.extents.x;
+            float height = mesh.bounds.extents.x;
             switch (Stonetype)
             {
                 case Stonetype.FlatStone:
@@ -94,6 +76,22 @@ namespace Tak
         void Update()
         {
             RaycastForInput();
+
+            if (transform.CompareTag("0"))
+            {
+                for (int i = 0; i < _materials.Count; i++)
+                {
+                    _materials[i].SetColor("_Color", palette.PlayerOne);
+                }
+            }
+            else if (transform.CompareTag("1"))
+            {
+                for (int i = 0; i < _materials.Count; i++)
+                {
+                    _materials[i].SetColor("_Color", palette.PlayerTwo);
+                }
+            }
+
             if (Stonetype != LastStonetype)
             {
                 OnStoneTypeChanged.Invoke();
@@ -105,11 +103,11 @@ namespace Tak
                 //if it's a standing stone, check if it's neighbor is a capstone, if so it falls down
                 if (transform.parent.childCount > transform.GetSiblingIndex() + 1)
                 {
-                    Debug.Log("here");
-                    if(transform.parent.GetChild(transform.GetSiblingIndex()+1).GetComponent<Stone>()){
+                    if (transform.parent.GetChild(transform.GetSiblingIndex() + 1).GetComponent<Stone>())
+                    {
                         Debug.Log("Collapsing standing stone");
                         //a capstone is on top of a standing stone
-                        Stonetype=Stonetype.FlatStone;
+                        Stonetype = Stonetype.FlatStone;
                     }
                 }
             }
@@ -121,19 +119,21 @@ namespace Tak
 
             if (Physics.Raycast(ray, out hit, 100.0f, TakGameManager.inputMask))
             {
-                if (hit.collider.gameObject == transform.GetChild(0).gameObject)
+                if (hit.collider == null || hit.collider.transform.parent == null)
+                    return;
+
+                if (hit.collider.transform.parent.gameObject == gameObject)
                 {
-                    //print("hitting " + hit.collider.name);
-                    GetComponentInChildren<MeshRenderer>().material = Selected;
+                    GetComponent<SetGlowColor>().Glow = palette.Glow;
                 }
                 else
                 {
-                    GetComponentInChildren<MeshRenderer>().material = Deselected;
+                    GetComponent<SetGlowColor>().Glow = new Color(0, 0, 0, 1);
                 }
             }
             else
             {
-                GetComponentInChildren<MeshRenderer>().material = Deselected;
+                GetComponent<SetGlowColor>().Glow = new Color(0, 0, 0, 1);
             }
         }
     }

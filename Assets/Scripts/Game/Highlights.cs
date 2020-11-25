@@ -9,18 +9,20 @@ namespace Tak
         internal Collider myCol;
 
         internal void Init()
-        {      
+        {
             SetShouldRaycast(false);
         }
-        
+
         public void SetShouldRaycast(bool state)
         {
+            myCol = GetComponentInChildren<Collider>();
+
             if (myCol == null)
             {
                 Debug.LogError("no collider on this highlightable object" + name);
                 return;
             }
-            
+
 
             if (state == true)
             {
