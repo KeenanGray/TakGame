@@ -16,16 +16,9 @@ namespace Tak
         eight
     };
 
-    public struct PlayerPieces
-    {
-        int Flatstones;
-        int Standingstones;
-        int Capstone;
-    }
-
     public class TakBoard : MonoBehaviour
     {
-        [SerializeField]
+        //TODO:Fix these magic numbers
         float[] sizes = new float[4] { 0.018f, 0.02f, 0.02f, 0.02f };
 
         float offset = 0.042f;
@@ -40,6 +33,9 @@ namespace Tak
         [SerializeField]
         IntReference CurrentPlayer = null;
 
+        [SerializeField]
+        GameObject piece;
+
         Transform boardTilesPool;
         string boardTilesPoolName = "SquaresPool";
         Transform board;
@@ -47,9 +43,6 @@ namespace Tak
 
         GameObject PlayerOnePool;
         GameObject PlayerTwoPool;
-
-        public PlayerPieces playerOnePieces;
-        public PlayerPieces playerTwoPieces;
 
         public delegate void OnBoardSizeChanged(int BoardSize);
         public static OnBoardSizeChanged OnBoardSizeChangedDelegate;
@@ -142,103 +135,49 @@ namespace Tak
 
         public void ReturnPiecesToPool()
         {
-            var prnt = GameObject.Find("Stones");
+            var StoneParent = GameObject.Find("Stones");
             var stones = GameObject.FindObjectsOfType<Stone>();
-            for (int j = 0; j < stones.Length; j++)
-            {
-                stones[j].gameObject.transform.SetParent(prnt.transform);
-                stones[j].transform.localPosition = new Vector3(0, 0, 0);
-                stones[j].transform.eulerAngles = new Vector3(0, 0, 0);
-                stones[j].transform.eulerAngles = new Vector3(0.025f, .025f, 0);
-            }
-
-            var number = 0;
-            switch (BoardSize.i_Size)
-            {
-                case 3:
-                    number = 10;
-                    break;
-                case 4:
-                    number = 15;
-                    break;
-                case 5:
-                    number = 21;
-                    break;
-                case 6:
-                    number = 30;
-                    break;
-                case 7:
-                    number = 40;
-                    break;
-                case 8:
-                    number = 50;
-                    break;
-                default:
-                    Debug.LogError("this number does not make sense");
-                    break;
-            }
 
             var PlayerOnePool = GameObject.Find("PlayerOnePool").transform;
             var PlayerTwoPool = GameObject.Find("PlayerTwoPool").transform;
 
-            int i = 0;
-            int Max = 30;
-
-            var init = 0f;
-
-            //put pieces in player 1 pool
-            // Material PlayerOneMat = Resources.Load("Materials/SideOneMat") as Material;
-            // Material PlayerTwoMat = Resources.Load("Materials/SideTwoMat") as Material;
-
-            while (i < number)
+            if (stones.Length > 0)
             {
-                if (prnt.transform.childCount <= 0)
-                    return;
-
-                Transform t1 = null;
-                t1 = prnt.transform.GetChild(0).transform;
-                t1.SetParent(PlayerOnePool);
-
-                //only move it if we have room in the tray
-                if (i < Max / 2)
+                foreach (Stone s in stones)
                 {
-                    t1.localPosition = new Vector3(0, -init, 0f);
-                    init += trayOffset;
-                }
-                else
-                {
-                    t1.localPosition = new Vector3(0, 0, 0f);
+                    DestroyImmediate(s.gameObject);
                 }
 
-                t1.localEulerAngles = new Vector3(0, 0, 0);
-                i++;
+                for (int pieces = 0; pieces < BoardSize.getNumberOfPieces() * 2; pieces++)
+                {
+                    var tmp = Instantiate(piece, StoneParent.transform);
+                    tmp.gameObject.transform.SetParent(StoneParent.transform);
+                    tmp.transform.localPosition = new Vector3(0, 0, 0);
+                    tmp.transform.eulerAngles = new Vector3(0, 0, 0);
+                    tmp.transform.eulerAngles = new Vector3(0.025f, .025f, 0);
 
-                t1.GetComponentInChildren<Highlights>().SetShouldRaycast(false);
+                    int perPlayer = BoardSize.getNumberOfPieces();
+                    float init = 0;
+
+                    //put pieces in player 1 pool
+                    if (pieces < perPlayer)
+                    {
+                        tmp.transform.SetParent(PlayerOnePool);
+                        tmp.transform.localPosition = new Vector3(0, -init, 0f);
+                        init += trayOffset;
+                    }
+                    else //put pieces in player 2 pool
+                    {
+                        tmp.transform.SetParent(PlayerTwoPool);
+
+                        tmp.transform.localPosition = new Vector3(0, -init, 0f);
+                        init += trayOffset;
+                    }
+
+                    tmp.transform.GetComponentInChildren<Highlights>().SetShouldRaycast(false);
+                    tmp.transform.localEulerAngles = new Vector3(0, 0, 0);
+                }
             }
-            i = 0;
-            //put pieces in player 2 pool
-            while (i < number)
-            {
-                var t2 = prnt.transform.GetChild(0).transform;
-                t2.SetParent(PlayerTwoPool);
-
-                //only move it if we have room in the tray
-                if (i < Max / 2)
-                {
-                    t2.localPosition = new Vector3(0, -init, 0f);
-                    init += trayOffset;
-                }
-                else
-                {
-                    t2.localPosition = new Vector3(0, 0, 0f);
-                }
-
-                t2.localEulerAngles = new Vector3(0, 0, 0);
-
-                i++;
-                t2.GetComponentInChildren<Highlights>().SetShouldRaycast(false);
-            }
-
         }
 
         public GameObject GetPiece()
@@ -322,9 +261,40 @@ namespace Tak
         public BoardSizeNames size;
         public string s_Size;
         public int i_Size;
+
         public int getSize()
         {
             return (int)size + 3;
+        }
+
+        public int getNumberOfPieces()
+        {
+            var number = 0;
+            switch (i_Size)
+            {
+                case 3:
+                    number = 10;
+                    break;
+                case 4:
+                    number = 15;
+                    break;
+                case 5:
+                    number = 21;
+                    break;
+                case 6:
+                    number = 30;
+                    break;
+                case 7:
+                    number = 40;
+                    break;
+                case 8:
+                    number = 50;
+                    break;
+                default:
+                    Debug.LogError("this number does not make sense");
+                    break;
+            }
+            return number;
         }
     }
 

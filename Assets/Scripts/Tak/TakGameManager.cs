@@ -13,9 +13,6 @@ namespace Tak
         [SerializeField]
         GameObject board;
 
-        [SerializeField]
-        BoolReference Picking = null;
-
         delegate void TilePickedUpEvent();
         TilePickedUpEvent onTilePickedUp = null;
 
@@ -23,9 +20,8 @@ namespace Tak
         TurnFinished onTurnFinished = null;
 
         [SerializeField]
-        IntReference CurrentPlayer = null;
+        TurnData TurnData = null;
 
-        GameObject[] Picked;
         GameObject LiftedFromSquare;
         Transform ogSquare;
 
@@ -47,9 +43,8 @@ namespace Tak
         void Start()
         {
             lastDir = Direction.None;
-            Picked = new GameObject[5];
-
-            Picking.Value = false;
+            TurnData.Init();
+            TurnData.Picking.Value = false;
 
             inputMask = (1) | (1 << 4) | (1 << 5) | (1 << 8) | (1 << 10);
             //        print(Convert.ToString(inputMask.value, 2));
@@ -57,8 +52,13 @@ namespace Tak
 
             ResetRaycasts();
 
-            CurrentPlayer.Value = 0;
-            onTurnFinished += RadioButtonReset;
+            TurnData.CurrentPlayer.Value = 0;
+
+            onTurnFinished += () =>
+            {
+                print("Turn Ended");
+                TurnData.PlaceType = Stonetype.FlatStone;
+            };
         }
 
         // Update is called once per frame
@@ -70,7 +70,7 @@ namespace Tak
             {
                 if (Selected != null)
                 {
-                    MakeMove(CurrentPlayer.Value);
+                    MakeMove(TurnData.CurrentPlayer.Value);
                 }
                 else
                 {
@@ -115,7 +115,7 @@ namespace Tak
         {
             var boardSpaces = board.transform.Find("BoardSpaces");
 
-            if (Picking.Value)
+            if (TurnData.Picking.Value)
             {
                 //Here is what we do while stones are selected
                 Direction dir;
@@ -141,15 +141,15 @@ namespace Tak
                     }
 
                     //Set the parent of the bottom piece
-                    if (Picked[StackIndex] != null)
+                    if (TurnData.Picked[StackIndex] != null)
                     {
                         //Put the stone on top of the other stone
-                        Picked[StackIndex].transform.SetParent(t);
+                        TurnData.Picked[StackIndex].transform.SetParent(t);
                         var yPos = 0f;
                         float stoneOffset = 0.006f;
-                        yPos = (Picked[StackIndex].transform.parent.childCount - 2) * stoneOffset;
-                        Picked[StackIndex].transform.localPosition = new Vector3(0, yPos, 0);
-                        Picked[StackIndex].GetComponent<Highlights>().SetShouldRaycast(true);
+                        yPos = (TurnData.Picked[StackIndex].transform.parent.childCount - 2) * stoneOffset;
+                        TurnData.Picked[StackIndex].transform.localPosition = new Vector3(0, yPos, 0);
+                        TurnData.Picked[StackIndex].GetComponent<Highlights>().SetShouldRaycast(true);
                         StackIndex++;
                         movesLeft--;
                     }
@@ -167,7 +167,7 @@ namespace Tak
             }
 
             //check if we clicked a stone
-            if ((Selected.CompareTag("0") || Selected.CompareTag("1")) && !Picking.Value)
+            if ((Selected.CompareTag("0") || Selected.CompareTag("1")) && !TurnData.Picking.Value)
             {
                 var currentSqr = Selected.transform.parent;
                 //for the stone and each stone above it in the stack - turn off highlights
@@ -179,7 +179,7 @@ namespace Tak
                 for (int stone = Selected.transform.GetSiblingIndex(); stone < Selected.transform.parent.childCount; stone += 1)
                 {
                     //Set that we are moving a piece
-                    Picking.Value = true;
+                    TurnData.Picking.Value = true;
 
                     if (onTilePickedUp != null)
                         onTilePickedUp();
@@ -191,8 +191,8 @@ namespace Tak
                     movesLeft++;
                     if (stone < Selected.transform.parent.childCount && stone > 0)
                     {
-                        Picked[cur] = Selected.transform.parent.GetChild(stone).gameObject;
-                        Picked[cur].transform.localPosition += new Vector3(0, .05f, 0);
+                        TurnData.Picked[cur] = Selected.transform.parent.GetChild(stone).gameObject;
+                        TurnData.Picked[cur].transform.localPosition += new Vector3(0, .05f, 0);
                         cur++;
                     }
                 }
@@ -292,13 +292,18 @@ namespace Tak
             }
 
             //we are placing on a selected space
-            if (Selected.CompareTag("Space") && !Picking.Value)
+            if (Selected.CompareTag("Space") && !TurnData.Picking.Value)
             {
-                var radioSelected = GameObject.FindObjectOfType<RadioButtonContainer>().selected;
-                Stonetype t = (Stonetype)radioSelected.transform.GetSiblingIndex();
+                //Set the piece type
+                Stonetype t = TurnData.PlaceType;
 
+                if (t == Stonetype.CapStone)
+                {
+                    //deduct capstone supply from the player
+                    TurnData.CapStones[TurnData.CurrentPlayer.Value] = 0;
+                }
                 //can't place on a square that already has a child
-                //squares have a quad below them so we compare against 1
+                //squares have a quad below them so we compare against index 1
                 if (Selected.transform.childCount != 1)
                 {
                     return;
@@ -357,18 +362,18 @@ namespace Tak
 
         void UndoMove()
         {
-            if (LiftedFromSquare == null || !Picking.Value)
+            if (LiftedFromSquare == null || !TurnData.Picking.Value)
                 return;
 
             //put back any pieces we may have moved
-            for (int i = 0; i < Picked.Length; i++)
+            for (int i = 0; i < TurnData.Picked.Length; i++)
             {
-                if (Picked[i] == null)
+                if (TurnData.Picked[i] == null)
                     continue;
 
-                Picked[i].transform.SetParent(ogSquare);
-                var target = Picked[i].transform.parent.childCount + i;
-                Picked[i].transform.SetSiblingIndex(target);
+                TurnData.Picked[i].transform.SetParent(ogSquare);
+                var target = TurnData.Picked[i].transform.parent.childCount + i;
+                TurnData.Picked[i].transform.SetSiblingIndex(target);
 
                 ogSquare.GetComponent<Square>().SendMessage("RedoHeights");
             }
@@ -380,11 +385,11 @@ namespace Tak
         {
             if (p == 0)
             {
-                CurrentPlayer.Value = 1;
+                TurnData.CurrentPlayer.Value = 1;
             }
             else if (p == 1)
             {
-                CurrentPlayer.Value = 0;
+                TurnData.CurrentPlayer.Value = 0;
             }
             ResetRaycasts();
         }
@@ -411,7 +416,7 @@ namespace Tak
                 var topStone = curSquare.transform.GetChild(curSquare.transform.childCount - 1);
 
                 //else do not allow raycast on objects in stack
-                if (!topStone.CompareTag(CurrentPlayer.Value.ToString()))
+                if (!topStone.CompareTag(TurnData.CurrentPlayer.Value.ToString()))
                 {
                     for (int sibling = 1; sibling < curSquare.transform.childCount; sibling++)
                     {
@@ -419,14 +424,14 @@ namespace Tak
                     }
                 }
 
-                if (Picking.Value)
+                if (TurnData.Picking.Value)
                 {
                     Debug.Log("PICKING");
                 }
                 else
                 {
                     //if the top is the player - allow raycast(to all siblings, but not the quad), down to five
-                    if (topStone.CompareTag(CurrentPlayer.Value.ToString()))
+                    if (topStone.CompareTag(TurnData.CurrentPlayer.Value.ToString()))
                     {
                         var target = Mathf.Max(curSquare.transform.childCount - 6, 0);
                         for (int sibling = curSquare.transform.childCount - 1; sibling > target; sibling--)
@@ -457,13 +462,13 @@ namespace Tak
         {
             var boardSpaces = board.transform.Find("BoardSpaces");
 
-            Picking.Value = false;
+            TurnData.Picking.Value = false;
             for (int i = 0; i < board.transform.childCount; i++)
             {
                 boardSpaces.transform.GetChild(i).GetComponent<Highlights>().SetShouldRaycast(true);
             }
-            for (int i = 0; i < Picked.Length; i++)
-                Picked[i] = null;//set the moved stone to null since we no longer have it selected.
+            for (int i = 0; i < TurnData.Picked.Length; i++)
+                TurnData.Picked[i] = null;//set the moved stone to null since we no longer have it selected.
             StackIndex = 0;
 
             //change the selected piece back to flatstone for convenience
@@ -531,9 +536,6 @@ namespace Tak
             return (movesLeft == 0); //down here all picked objects are null so turn is done
         }
 
-        void RadioButtonReset()
-        {
-            GameObject.FindObjectOfType<RadioButtonContainer>().ChangeButtonWithInt(0);
-        }
+
     }
 }

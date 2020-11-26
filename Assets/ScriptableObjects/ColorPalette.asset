@@ -12,6 +12,45 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21ac9a6cf85e642fb8b3b750ad7d5faa, type: 3}
   m_Name: ColorPalette
   m_EditorClassIdentifier: 
-  PlayerOne: {r: 1, g: 1, b: 1, a: 1}
-  PlayerTwo: {r: 0.41509432, g: 0.31272143, b: 0, a: 1}
-  Glow: {r: 0.4648342, g: 1, b: 0, a: 1}
+  PlayerOne:
+    UseConstant: 0
+    ConstantValue:
+      serializedVersion: 2
+      rgba: 4294967295
+    Variable: {fileID: 11400000, guid: 241bb7276a63c46b5a80e8ac7386cd58, type: 2}
+  PlayerTwo:
+    UseConstant: 0
+    ConstantValue:
+      serializedVersion: 2
+      rgba: 4294967295
+    Variable: {fileID: 11400000, guid: 6e37e21cbf43042e691225bd8c7adccc, type: 2}
+  Glow:
+    UseConstant: 1
+    ConstantValue:
+      serializedVersion: 2
+      rgba: 4290822336
+    Variable: {fileID: 0}
+  SelectedHighlight:
+    UseConstant: 0
+    ConstantValue:
+      serializedVersion: 2
+      rgba: 4278946829
+    Variable: {fileID: 11400000, guid: 83b3707607c0d4bf189e74c84f70eb6e, type: 2}
+  Table:
+    UseConstant: 1
+    ConstantValue:
+      serializedVersion: 2
+      rgba: 4280098077
+    Variable: {fileID: 0}
+  Drawer:
+    UseConstant: 1
+    ConstantValue:
+      serializedVersion: 2
+      rgba: 4281216558
+    Variable: {fileID: 0}
+  TableTop:
+    UseConstant: 1
+    ConstantValue:
+      serializedVersion: 2
+      rgba: 4281646828
+    Variable: {fileID: 0}

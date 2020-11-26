@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class IconPerPlayer : MonoBehaviour
 {
     [SerializeField]
-    Palette palette;
+    Palette palette = null;
 
     public IntReference CurPlayer;
 
@@ -21,8 +21,8 @@ public class IconPerPlayer : MonoBehaviour
     void Update()
     {
         if (CurPlayer.Value == 1)
-            CurImage.color = palette.PlayerTwo;
+            CurImage.color = palette.PlayerTwo.Value;
         else if (CurPlayer.Value == 0)
-            CurImage.color = palette.PlayerOne;
+            CurImage.color = palette.PlayerOne.Value;
     }
 }

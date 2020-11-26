@@ -9,22 +9,26 @@ namespace Tak
         RaycastHit hit;
 
         [SerializeField]
-        Material[] SquareMats = new Material[2];
-
-        [SerializeField]
-        Material[] DiamondMats = new Material[2];
-        Material Selected, Deselected;
+        Palette palette;
 
         GameObject quadCollider;
+
+        Renderer _renderer;
+        MaterialPropertyBlock _matPropertyBlock;
+
+        [SerializeField]
+        Texture2D[] textures;
 
         // Start is called before the first frame update
         void Start()
         {
             SetTextureAndSize(GameObject.FindObjectOfType<TakBoard>().BoardSize.getSize());
 
+            _matPropertyBlock = new MaterialPropertyBlock();
+            _renderer = GetComponentInChildren<Renderer>();
             quadCollider = transform.GetChild(0).gameObject;
             myCol = quadCollider.GetComponent<BoxCollider>();
-            
+
             Init();
         }
 
@@ -41,17 +45,25 @@ namespace Tak
                 if (hit.collider.transform.parent.gameObject == gameObject && hit.collider.CompareTag("Space"))
                 {
                     //only do this if no piece is on top
-                    if (!(transform.childCount > 1))
-                        GetComponentInChildren<MeshRenderer>().material = Selected;
+                    //set color to selected
+                    _renderer.GetPropertyBlock(_matPropertyBlock);
+                    _matPropertyBlock.SetColor("_Color", palette.SelectedHighlight.Value);
+                    _renderer.SetPropertyBlock(_matPropertyBlock);
                 }
                 else
                 {
-                    GetComponentInChildren<MeshRenderer>().material = Deselected;
+                    //set color to not selected
+                    _renderer.GetPropertyBlock(_matPropertyBlock);
+                    _matPropertyBlock.SetColor("_Color", new Color(0, 0, 0, 0));
+                    _renderer.SetPropertyBlock(_matPropertyBlock);
                 }
             }
             else
             {
-                GetComponentInChildren<MeshRenderer>().material = Deselected;
+                //set color to not selected
+                _renderer.GetPropertyBlock(_matPropertyBlock);
+                _matPropertyBlock.SetColor("_Color", new Color(0, 0, 0, 0));
+                _renderer.SetPropertyBlock(_matPropertyBlock);
             }
         }
 
@@ -70,17 +82,25 @@ namespace Tak
 
         public void SetTextureAndSize(int size)
         {
+            if(_renderer==null)
+            _renderer = GetComponentInChildren<Renderer>();
+            if(_matPropertyBlock==null)
+            _matPropertyBlock = new MaterialPropertyBlock();
+            
             if (size % 2 == 0)
             {
-                Selected = SquareMats[0];
-                Deselected = SquareMats[1];
+                //set mat texture to square image
+                 _renderer.GetPropertyBlock(_matPropertyBlock);
+                _matPropertyBlock.SetTexture("_MainTex",textures[0]);
+                _renderer.SetPropertyBlock(_matPropertyBlock);
             }
             else
             {
-                Selected = DiamondMats[0];
-                Deselected = DiamondMats[1];
+                //set mat texture to diamond image
+                 _renderer.GetPropertyBlock(_matPropertyBlock);
+                _matPropertyBlock.SetTexture("_MainTex",textures[1]);
+                _renderer.SetPropertyBlock(_matPropertyBlock);
             }
-            GetComponentInChildren<MeshRenderer>().material = Deselected;
             transform.localScale = new Vector3(1, 1, 1);
         }
     }

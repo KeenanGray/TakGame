@@ -4,8 +4,8 @@ Shader "Keenan/SolidColor"
 {
     Properties
     {
-        _MainTex ("Texture", 2D) = "black" {}
-        _Color ("Color", Color) = (1,1,1,1)
+        [PerRendererData]_MainTex ("Texture", 2D) = "black" {}
+        [PerRendererData] _Color ("Color", Color) = (1,1,1,1)
     }
 
     SubShader
@@ -13,8 +13,10 @@ Shader "Keenan/SolidColor"
         Tags
         {
             "RenderType"="Opaque"
+            "Queue"="Transparent"
         }
-        
+        ZWrite off
+        Blend SrcAlpha OneMinusSrcAlpha // use alpha blending
         Pass
         {
             CGPROGRAM
@@ -51,13 +53,9 @@ Shader "Keenan/SolidColor"
 
             float4 frag(v2f i) : SV_TARGET
             {
-                float3 normal = normalize(i.normal);
-               // float3 color = (normal + 1) * 0.5;
                 float4 tex = tex2D(_MainTex,i.uv);
-                //return fixed4(color.r,color.g,color.b,1);
-                return fixed4(_Color.r,_Color.g,_Color.b,0) * tex;
+                return fixed4(_Color.r,_Color.g,_Color.b,_Color.a) * tex;
             }
-
             ENDCG
 
         }

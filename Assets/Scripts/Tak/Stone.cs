@@ -25,7 +25,7 @@ namespace Tak
         public StoneTypeChanged OnStoneTypeChanged;
 
         [SerializeField]
-        Palette palette;
+        Palette palette = null;
 
         MeshRenderer mesh;
 
@@ -81,14 +81,14 @@ namespace Tak
             {
                 for (int i = 0; i < _materials.Count; i++)
                 {
-                    _materials[i].SetColor("_Color", palette.PlayerOne);
+                    _materials[i].SetColor("_Color", palette.PlayerOne.Value);
                 }
             }
             else if (transform.CompareTag("1"))
             {
                 for (int i = 0; i < _materials.Count; i++)
                 {
-                    _materials[i].SetColor("_Color", palette.PlayerTwo);
+                    _materials[i].SetColor("_Color", palette.PlayerTwo.Value);
                 }
             }
 
@@ -124,7 +124,7 @@ namespace Tak
 
                 if (hit.collider.transform.parent.gameObject == gameObject)
                 {
-                    GetComponent<SetGlowColor>().Glow = palette.Glow;
+                    GetComponent<SetGlowColor>().Glow = palette.Glow.Value;
                 }
                 else
                 {

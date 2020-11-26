@@ -5,7 +5,12 @@ using UnityEngine;
 [CreateAssetMenu]
 public class Palette : ScriptableObject
 {
-    public Color PlayerOne;
-    public Color PlayerTwo;
-    public Color Glow;
+    public ColorReference PlayerOne;
+    public ColorReference PlayerTwo;
+    public ColorReference Glow;
+    public ColorReference SelectedHighlight;
+
+    public ColorReference Table;
+    public ColorReference Drawer;
+    public ColorReference TableTop;
 }
