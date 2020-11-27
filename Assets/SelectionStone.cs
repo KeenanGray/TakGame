@@ -1,13 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using Tak;
 namespace Tak
 {
+    [ExecuteInEditMode]
     public class SelectionStone : MonoBehaviour
     {
         public TurnData turnData;
-        public Palette palette;
 
         [SerializeField]
         Stonetype myType = Stonetype.FlatStone;
@@ -17,11 +17,13 @@ namespace Tak
 
         bool mouseIsOver;
 
+        Palette palette;
         void Awake()
         {
             turnData.PlaceType = Stonetype.FlatStone;
             _matPropertyBlock = new MaterialPropertyBlock();
             _renderer = GetComponentInChildren<Renderer>();
+            palette = GameObject.Find("GameManager").GetComponent<TakGameManager>().palette;
         }
 
         void Start()
@@ -31,12 +33,18 @@ namespace Tak
 
         void Update()
         {
-            Color color = palette.PlayerOne.Value;
+            if (_renderer == null || _matPropertyBlock == null)
+            {
+                _matPropertyBlock = new MaterialPropertyBlock();
+                _renderer = GetComponentInChildren<Renderer>();
+            }
+
+            Color color = palette.GetColorByName("PlayerOne");
 
             if (turnData.CurrentPlayer.Value == 0)
-                color = palette.PlayerOne.Value;
+                color = palette.GetColorByName("PlayerOne");
             else
-                color = palette.PlayerTwo.Value;
+                color = palette.GetColorByName("PlayerTwo");
 
             _renderer.GetPropertyBlock(_matPropertyBlock);
             _matPropertyBlock.SetColor("_Color", color);
@@ -46,7 +54,7 @@ namespace Tak
             if (myType == turnData.PlaceType)
             {
                 _renderer.GetPropertyBlock(_matPropertyBlock);
-                _matPropertyBlock.SetColor("_GlowColor", palette.SelectedHighlight.Value);
+                _matPropertyBlock.SetColor("_GlowColor", palette.GetColorByName("Glow"));
                 _renderer.SetPropertyBlock(_matPropertyBlock);
             }
             else if (!mouseIsOver)
@@ -57,8 +65,11 @@ namespace Tak
             }
 
             //limit capstone placement to 1
-            if (myType == Stonetype.CapStone)
-                transform.GetChild(0).gameObject.SetActive(turnData.CapStones[turnData.CurrentPlayer.Value] == 1);
+            if (Application.isPlaying)
+            {
+                if (myType == Stonetype.CapStone)
+                    transform.GetChild(0).gameObject.SetActive(turnData.CapStones[turnData.CurrentPlayer.Value] == 1);
+            }
         }
 
         private void OnMouseEnter()
@@ -68,7 +79,7 @@ namespace Tak
                 return;
 
             _renderer.GetPropertyBlock(_matPropertyBlock);
-            _matPropertyBlock.SetColor("_GlowColor", palette.Glow.Value);
+            _matPropertyBlock.SetColor("_GlowColor", palette.GetColorByName("Glow"));
             _renderer.SetPropertyBlock(_matPropertyBlock);
         }
 

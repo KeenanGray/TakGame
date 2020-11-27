@@ -14,6 +14,8 @@ namespace Tak
         [SerializeField]
         GameObject board;
 
+        public Palette palette;
+
         delegate void TilePickedUpEvent();
         TilePickedUpEvent onTilePickedUp = null;
 
@@ -387,13 +389,10 @@ namespace Tak
         void ChangePlayer(int p)
         {
             if (p == 0)
-            {
-                //TurnData.CurrentPlayer.Value = 1;
-            }
+                TurnData.CurrentPlayer.Value = 1;
             else if (p == 1)
-            {
-                //TurnData.CurrentPlayer.Value = 0;
-            }
+                TurnData.CurrentPlayer.Value = 0;
+
             ResetRaycasts();
         }
 
@@ -569,12 +568,26 @@ namespace Tak
 
         //source is the integer of the square we are coming from
         //-1 on first call
+        List<int> Checked;
         bool SolveRoad(GameObject edgeSquare, int source, GameObject[] edge1, GameObject[] edge2)
         {
             bool returnval = false;
 
             int size = board.GetComponent<TakBoard>().BoardSize.getSize();
             int index = edgeSquare.transform.GetSiblingIndex();
+
+            if (source == -1)
+                Checked = new List<int>();
+            else
+            {
+                if (Checked.Contains(index))
+                {
+                    print(index + " Checked already");
+                    returnval = false;
+                }
+
+            }
+            Checked.Add(index);
 
             if (IsSquareOnEdge(index, edge2))
                 return true;
@@ -600,7 +613,7 @@ namespace Tak
             //for each neighbor
             Square neighborSquare = null;
             Stone neighborStone = null;
-            if (index1 > 0 && index1 < totalSpaces && index1 != source)
+            if (index1 > 0 && index1 < totalSpaces && !IsSquareOnEdge(index1, edge1) && index1 != source && !Checked.Contains(index1))
             {
                 neighborSquare = board.transform.GetChild(0).GetChild(index1).GetComponent<Square>();
 
@@ -613,12 +626,14 @@ namespace Tak
                         if (returnval)
                             return true;
                         else
-                            return SolveRoad(board.transform.GetChild(0).GetChild(index1).gameObject, index, edge1, edge2);
+                            returnval = SolveRoad(board.transform.GetChild(0).GetChild(index1).gameObject, index, edge1, edge2);
+                        if (returnval)
+                            return true;
                     }
                 }
             }
 
-            if (index2 > 0 && index2 < totalSpaces && index2 != source)
+            if (index2 > 0 && index2 < totalSpaces && !IsSquareOnEdge(index2, edge1) && index2 != source && !Checked.Contains(index2))
             {
                 neighborSquare = board.transform.GetChild(0).GetChild(index2).GetComponent<Square>();
 
@@ -631,12 +646,14 @@ namespace Tak
                         if (returnval)
                             return true;
                         else
-                            return SolveRoad(board.transform.GetChild(0).GetChild(index2).gameObject, index, edge1, edge2);
+                            returnval = SolveRoad(board.transform.GetChild(0).GetChild(index2).gameObject, index, edge1, edge2);
+                        if (returnval)
+                            return true;
                     }
                 }
             }
 
-            if (index3 > 0 && index3 < totalSpaces && index3 != source)
+            if (index3 > 0 && index3 < totalSpaces && !IsSquareOnEdge(index3, edge1) && index3 != source && !Checked.Contains(index3))
             {
                 neighborSquare = board.transform.GetChild(0).GetChild(index3).GetComponent<Square>();
 
@@ -649,12 +666,14 @@ namespace Tak
                         if (returnval)
                             return true;
                         else
-                            return SolveRoad(board.transform.GetChild(0).GetChild(index3).gameObject, index, edge1, edge2);
+                            returnval = SolveRoad(board.transform.GetChild(0).GetChild(index3).gameObject, index, edge1, edge2);
+                        if (returnval)
+                            return true;
                     }
                 }
             }
 
-            if (index4 > 0 && index4 < totalSpaces && index4 != source)
+            if (index4 > 0 && index4 < totalSpaces && !IsSquareOnEdge(index4, edge1) && index4 != source && !Checked.Contains(index4))
             {
                 neighborSquare = board.transform.GetChild(0).GetChild(index4).GetComponent<Square>();
 
@@ -667,7 +686,9 @@ namespace Tak
                         if (returnval)
                             return true;
                         else
-                            return SolveRoad(board.transform.GetChild(0).GetChild(index4).gameObject, index, edge1, edge2);
+                            returnval = SolveRoad(board.transform.GetChild(0).GetChild(index4).gameObject, index, edge1, edge2);
+                        if (returnval)
+                            return true;
                     }
                 }
             }

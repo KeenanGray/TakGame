@@ -21,8 +21,8 @@ public class IconPerPlayer : MonoBehaviour
     void Update()
     {
         if (CurPlayer.Value == 1)
-            CurImage.color = palette.PlayerTwo.Value;
+            CurImage.color = palette.GetColorByName("PlayerOne");
         else if (CurPlayer.Value == 0)
-            CurImage.color = palette.PlayerOne.Value;
+            CurImage.color = palette.GetColorByName("PlayerTwo");
     }
 }

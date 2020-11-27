@@ -17,6 +17,7 @@ Shader "Keenan/SolidColor"
         }
         ZWrite off
         Blend SrcAlpha OneMinusSrcAlpha // use alpha blending
+        // Blend one one//use additive blending
         Pass
         {
             CGPROGRAM

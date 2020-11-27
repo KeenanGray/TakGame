@@ -24,12 +24,14 @@ namespace Tak
         public delegate void StoneTypeChanged();
         public StoneTypeChanged OnStoneTypeChanged;
 
-        [SerializeField]
         Palette palette = null;
 
         MeshRenderer mesh;
 
         List<Material> _materials;
+
+        Renderer _renderer;
+        MaterialPropertyBlock _matPropertyBlock;
 
         public Mesh[] StoneMeshes;
         void Awake()
@@ -45,8 +47,10 @@ namespace Tak
 
         void Start()
         {
-            _materials = new List<Material>();
-            GetComponentInChildren<MeshRenderer>().GetMaterials(_materials);
+            _matPropertyBlock = new MaterialPropertyBlock();
+            _renderer = GetComponentInChildren<Renderer>();
+            palette = GameObject.Find("GameManager").GetComponent<Tak.TakGameManager>().palette;
+
         }
 
         void ChangeStoneTypeModel()
@@ -79,17 +83,11 @@ namespace Tak
 
             if (transform.CompareTag("0"))
             {
-                for (int i = 0; i < _materials.Count; i++)
-                {
-                    _materials[i].SetColor("_Color", palette.PlayerOne.Value);
-                }
+                Setcolor(palette.GetColorByName("PlayerOne"));
             }
             else if (transform.CompareTag("1"))
             {
-                for (int i = 0; i < _materials.Count; i++)
-                {
-                    _materials[i].SetColor("_Color", palette.PlayerTwo.Value);
-                }
+                Setcolor(palette.GetColorByName("PlayerTwo"));
             }
 
             if (Stonetype != LastStonetype)
@@ -124,7 +122,7 @@ namespace Tak
 
                 if (hit.collider.transform.parent.gameObject == gameObject)
                 {
-                    GetComponent<SetGlowColor>().Glow = palette.Glow.Value;
+                    GetComponent<SetGlowColor>().Glow = palette.GetColorByName("Glow");
                 }
                 else
                 {
@@ -135,6 +133,16 @@ namespace Tak
             {
                 GetComponent<SetGlowColor>().Glow = new Color(0, 0, 0, 1);
             }
+        }
+        public void Setcolor(Color newColor)
+        {
+            if (_renderer == null || _matPropertyBlock == null)
+            {
+                Start();
+            }
+            _renderer.GetPropertyBlock(_matPropertyBlock);
+            _matPropertyBlock.SetColor("_Color", newColor);
+            _renderer.SetPropertyBlock(_matPropertyBlock);
         }
     }
 }

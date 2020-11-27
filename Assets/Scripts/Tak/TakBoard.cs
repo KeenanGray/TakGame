@@ -19,7 +19,7 @@ namespace Tak
     public class TakBoard : MonoBehaviour
     {
         //TODO:Fix these magic numbers
-        float[] sizes = new float[4] { 0.018f, 0.02f, 0.02f, 0.02f };
+        float[] sizes = new float[4] { 0.024f, 0.04f, 0.02f, 0.02f };
 
         float offset = 0.042f;
 
@@ -44,7 +44,7 @@ namespace Tak
         GameObject PlayerOnePool;
         GameObject PlayerTwoPool;
 
-        public GameObject[] LeftEdge,RightEdge,TopEdge,BottomEdge;
+        public GameObject[] LeftEdge, RightEdge, TopEdge, BottomEdge;
 
         public delegate void OnBoardSizeChanged(int BoardSize);
         public static OnBoardSizeChanged OnBoardSizeChangedDelegate;
@@ -152,6 +152,9 @@ namespace Tak
                     DestroyImmediate(s.gameObject);
                 }
 
+                float init = 0;
+                int MaxInTray = 34;
+
                 for (int pieces = 0; pieces < BoardSize.getNumberOfPieces() * 2; pieces++)
                 {
                     var tmp = Instantiate(piece, StoneParent.transform);
@@ -161,22 +164,39 @@ namespace Tak
                     tmp.transform.eulerAngles = new Vector3(0.025f, .025f, 0);
 
                     int perPlayer = BoardSize.getNumberOfPieces();
-                    float init = 0;
 
                     //put pieces in player 1 pool
                     if (pieces < perPlayer)
                     {
                         tmp.transform.SetParent(PlayerOnePool);
-                        tmp.transform.localPosition = new Vector3(0, -init, 0f);
-                        init += trayOffset;
+                        tmp.GetComponent<Stone>().Setcolor(GameObject.Find("GameManager").GetComponent<TakGameManager>().palette.GetColorByName("PlayerOne"));
                     }
                     else //put pieces in player 2 pool
                     {
                         tmp.transform.SetParent(PlayerTwoPool);
+                        tmp.GetComponent<Stone>().Setcolor(GameObject.Find("GameManager").GetComponent<TakGameManager>().palette.GetColorByName("PlayerTwo"));
+                    }
 
-                        tmp.transform.localPosition = new Vector3(0, -init, 0f);
+                    //set the position of the piece in the tray
+                    //if we have not filled the tray
+                    if (pieces < MaxInTray / 2)
+                    {
+                        tmp.transform.localPosition = new Vector3(0, -init, 0);
                         init += trayOffset;
                     }
+                    else if (pieces - perPlayer < MaxInTray / 2 && pieces >= perPlayer)
+                    {
+                        tmp.transform.localPosition = new Vector3(0, -init, 0);
+                        init += trayOffset;
+                    }
+                    else //send it to space
+                    {
+                        tmp.transform.position = new Vector3(0, 5, 0);
+
+                    }
+
+
+
 
                     tmp.transform.GetComponentInChildren<Highlights>().SetShouldRaycast(false);
                     tmp.transform.localEulerAngles = new Vector3(0, 0, 0);
@@ -222,28 +242,25 @@ namespace Tak
             foreach (Square s in GameObject.Find("BoardSpaces").GetComponentsInChildren<Square>())
             {
                 //Bottom Edge
-                if (s.transform.GetSiblingIndex() < 5)
+                if (s.transform.GetSiblingIndex() < size)
                 {
                     //Bottom Edge
-                    s.Setcolor(new Color(1, 0, 0, 1));
                     BottomEdge[s.transform.GetSiblingIndex()] = s.gameObject;
                 }
                 if (s.transform.GetSiblingIndex() > Mathf.Pow(size, 2) - size - 1)
                 {
                     //top color
-                    s.Setcolor(new Color(1, 0, 0, 1));
                     TopEdge[(int)Math.Pow(size, 2) - s.transform.GetSiblingIndex() - 1] = s.gameObject;
+
                 }
                 if (s.transform.GetSiblingIndex() % size == 0)
                 {
                     //Left Edge
-                    s.Setcolor(new Color(0, 0, 1, 1));
                     LeftEdge[s.transform.GetSiblingIndex() / size] = s.gameObject;
                 }
                 if (s.transform.GetSiblingIndex() % size == size - 1)
                 {
                     //Right Edge
-                    s.Setcolor(new Color(0, 0, 1, 1));
                     RightEdge[s.transform.GetSiblingIndex() / size] = s.gameObject;
                 }
             }

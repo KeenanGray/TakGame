@@ -44,7 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3619bae6dcb34dbcb5feb9aeb674ec0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  palette: {fileID: 11400000, guid: bbfdef94147084a978c48c30dd858045, type: 2}
   textures:
   - {fileID: 2800000, guid: c4b238b7fb9384a9792f0dc95ed5f6a0, type: 3}
   - {fileID: 2800000, guid: eba0c64c2e0a146a79346f6a639468d3, type: 3}
@@ -60,7 +59,6 @@ GameObject:
   - component: {fileID: 8445786468911193624}
   - component: {fileID: 6467311876121801228}
   - component: {fileID: 1663421106174211894}
-  - component: {fileID: 6051270332255094484}
   m_Layer: 0
   m_Name: Quad
   m_TagString: Space
@@ -144,21 +142,3 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1.0000002, z: 6.123235e-17}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &6051270332255094484
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8354772127744464507}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1dee7de114b064148881bc98a1da8957, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  color:
-    UseConstant: 0
-    ConstantValue:
-      serializedVersion: 2
-      rgba: 4294967295
-    Variable: {fileID: 11400000, guid: 83b3707607c0d4bf189e74c84f70eb6e, type: 2}

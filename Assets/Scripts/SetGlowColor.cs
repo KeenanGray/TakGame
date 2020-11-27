@@ -6,39 +6,32 @@ public class SetGlowColor : MonoBehaviour
 {
     List<Material> _materials;
 
+    [HideInInspector]
     public Color Glow;
     Color _currentColor;
     float lerpFactor = 1.5f;
 
+    MaterialPropertyBlock _matPropertyBlock;
+    Renderer _renderer;
     // Start is called before the first frame update
     void Start()
     {
-        _materials = new List<Material>();
-        GetComponentInChildren<MeshRenderer>().GetMaterials(_materials);
-
-        Glow = new Color(0,0,0,1);
+        Glow = new Color(0, 0, 0, 1);
+        _matPropertyBlock = new MaterialPropertyBlock();
+        _renderer = GetComponentInChildren<Renderer>();
     }
 
     // Update is called once per frame
     void Update()
-    { 
-        if (_materials != null)
-        {
-            _currentColor = Color.Lerp(
-                _currentColor,Glow,
-                lerpFactor*Time.deltaTime
-            );
+    {
+        _currentColor = Color.Lerp(
+            _currentColor, Glow,
+            lerpFactor * Time.deltaTime
+        );
 
-            for (int i = 0; i < _materials.Count; i++)
-            {
-                _materials[i].SetColor("_GlowColor", _currentColor);
-            }
-        }
-        else
-        {
-            _materials = new List<Material>();
-            GetComponentInChildren<MeshRenderer>().GetMaterials(_materials);
-        }
-        
+        _renderer.GetPropertyBlock(_matPropertyBlock);
+        _matPropertyBlock.SetColor("_GlowColor", _currentColor);
+        _renderer.SetPropertyBlock(_matPropertyBlock);
+
     }
 }

@@ -8,7 +8,6 @@ namespace Tak
     {
         RaycastHit hit;
 
-        [SerializeField]
         Palette palette;
 
         GameObject quadCollider;
@@ -29,6 +28,7 @@ namespace Tak
             quadCollider = transform.GetChild(0).gameObject;
             myCol = quadCollider.GetComponent<BoxCollider>();
 
+            palette = GameObject.Find("GameManager").GetComponent<Tak.TakGameManager>().palette;
             Init();
         }
 
@@ -46,20 +46,19 @@ namespace Tak
                 {
                     //only do this if no piece is on top
                     //set color to selected
-                  //  Setcolor(palette.SelectedHighlight.Value);
+                    Setcolor(palette.GetColorByName("Highlight"));
 
                 }
                 else
                 {
                     //set color to not selected
-                  //  Setcolor(new Color(0, 0, 0, 0));
-
+                    Setcolor(new Color(0, 0, 0, 0));
                 }
             }
             else
             {
                 //set color to not selected
-               // Setcolor(new Color(0, 0, 0, 0));
+                Setcolor(new Color(0, 0, 0, 0));
             }
         }
 
@@ -102,7 +101,7 @@ namespace Tak
             transform.localScale = new Vector3(1, 1, 1);
         }
 
-        public void Setcolor(Color newColor)
+        private void Setcolor(Color newColor)
         {
             _renderer.GetPropertyBlock(_matPropertyBlock);
             _matPropertyBlock.SetColor("_Color", newColor);

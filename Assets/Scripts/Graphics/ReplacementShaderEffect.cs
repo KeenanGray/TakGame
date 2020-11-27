@@ -6,17 +6,21 @@ using UnityEngine;
 public class ReplacementShaderEffect : MonoBehaviour
 {
     public Shader ReplacementShader;
-    public Color OverDrawColor;
+    public Color ModColor;
+    [Range(0, 10)]
+    public float Factor;
 
     private void OnValidate()
     {
-        Shader.SetGlobalColor("_OverDrawColor",OverDrawColor);
+        Shader.SetGlobalColor("_ModColor", ModColor);
+        Shader.SetGlobalFloat("_Factor", Factor);
+
     }
 
     void Update()
     {
     }
-    
+
     // Start is called before the first frame update
     void OnEnable()
     {

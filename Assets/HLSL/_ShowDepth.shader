@@ -33,14 +33,15 @@
                 float depth : depth;
             };
 
-            float Factor;
+            float _Factor;
             float4 _Color;
+            half4 _ModColor;
 
             v2f vert (AppData v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.depth = -UnityObjectToViewPos(v.vertex).z * Factor;
+                o.depth = -UnityObjectToViewPos(v.vertex).z * lerp(0,1,_Factor);
                 return o;
             }
 
@@ -48,12 +49,12 @@
             fixed4 frag(v2f i) : SV_TARGET
             {
                 float invert = 1-i.depth;
-                return fixed4(invert,invert,invert,1) * _Color;
+                return fixed4(invert,invert,invert,1)  * _Color * _ModColor;
             }
             ENDHLSL
         }  
     }
-     SubShader
+    SubShader
     {
         
         Tags
@@ -63,7 +64,7 @@
         }      
         
         ZWrite off
-        Blend SrcAlpha OneMinusSrcAlpha 
+        Blend SrcAlpha One 
         Pass
         {
             HLSLPROGRAM
@@ -75,19 +76,23 @@
             struct AppData
             {
                 float4 vertex : POSITION;
+                float2 uv : TEXCOORD0;
             };
 
             struct v2f
             {
                 float4 vertex : SV_POSITION;
                 float depth : depth;
+                float2 uv : TEXCOORD0;
             };
 
             half4 _Color;
+            sampler2D _MainTex;
 
             v2f vert (AppData v)
             {
                 v2f o;
+                o.uv = v.uv;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 return o;
             }
@@ -95,7 +100,8 @@
             
             fixed4 frag(v2f i) : SV_TARGET
             {
-                return  _Color;
+                fixed4 c = tex2D (_MainTex, i.uv) * _Color;
+                return  c;
             }
             ENDHLSL
         }  
