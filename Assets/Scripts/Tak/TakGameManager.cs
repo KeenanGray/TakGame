@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 namespace Tak
 {
@@ -30,6 +31,8 @@ namespace Tak
         public static LayerMask inputMask;
         Direction lastDir;
 
+        public TextMeshProUGUI winText;
+
         public enum Direction
         {
             None,
@@ -47,7 +50,6 @@ namespace Tak
             TurnData.Picking.Value = false;
 
             inputMask = (1) | (1 << 4) | (1 << 5) | (1 << 8) | (1 << 10);
-            //        print(Convert.ToString(inputMask.value, 2));
             board = GameObject.Find("GameBoard");
 
             ResetRaycasts();
@@ -56,9 +58,10 @@ namespace Tak
 
             onTurnFinished += () =>
             {
-                print("Turn Ended");
                 TurnData.PlaceType = Stonetype.FlatStone;
             };
+
+            onTurnFinished += CheckForWinner;
         }
 
         // Update is called once per frame
@@ -216,15 +219,14 @@ namespace Tak
 
                     //Go in and turn on the squares we
                     //can place on (neighbors).
-                    var n1 = self + 1;
-                    var n2 = self - 1;
-                    var n3 = self + size;
-                    var n4 = self - size;
+                    int n1 = self + 1;
+                    int n2 = self - 1;
+                    int n3 = self + size;
+                    int n4 = self - size;
                     //A literal edge case!
                     if (self % size == 0)
                         n2 = 0;
 
-                    //                    Debug.Log(n1 + ", " + n2 + ", " + n3 + " " + n4);
                     if (i == n1 || i == n2 || i == n3 || i == n4)
                     {
                         var n = self;
@@ -319,6 +321,7 @@ namespace Tak
                 ChangePlayer(p);
                 onTurnFinished.Invoke();
 
+
                 return;
             }
         }
@@ -385,11 +388,11 @@ namespace Tak
         {
             if (p == 0)
             {
-                TurnData.CurrentPlayer.Value = 1;
+                //TurnData.CurrentPlayer.Value = 1;
             }
             else if (p == 1)
             {
-                TurnData.CurrentPlayer.Value = 0;
+                //TurnData.CurrentPlayer.Value = 0;
             }
             ResetRaycasts();
         }
@@ -532,10 +535,156 @@ namespace Tak
 
         bool IsMoveOver()
         {
-
             return (movesLeft == 0); //down here all picked objects are null so turn is done
         }
 
 
+
+        void CheckForWinner()
+        {
+            winText.text = "Connected";
+            winText.enabled = false;
+
+            TakBoard takBoard = board.GetComponent<TakBoard>();
+            foreach (GameObject s in takBoard.TopEdge)
+            {
+                //see if square connect to bottom edge through recursion
+                if (SolveRoad(s, -1, takBoard.TopEdge, takBoard.BottomEdge))
+                {
+                    winText.enabled = true;
+                    break;
+                }
+            }
+
+            foreach (GameObject s in takBoard.LeftEdge)
+            {
+                //see if square connects to bottom edge through recursion
+                if (SolveRoad(s, -1, takBoard.LeftEdge, takBoard.RightEdge))
+                {
+                    winText.enabled = true;
+                    break;
+                }
+            }
+        }
+
+        //source is the integer of the square we are coming from
+        //-1 on first call
+        bool SolveRoad(GameObject edgeSquare, int source, GameObject[] edge1, GameObject[] edge2)
+        {
+            bool returnval = false;
+
+            int size = board.GetComponent<TakBoard>().BoardSize.getSize();
+            int index = edgeSquare.transform.GetSiblingIndex();
+
+            if (IsSquareOnEdge(index, edge2))
+                return true;
+
+            Square s = board.transform.GetChild(0).GetChild(index).GetComponent<Square>();
+
+            //no need to check the space if no stone is
+            if (s.transform.childCount < 2)
+                return false; //no piece on the square, return here
+
+            Stone TopStone = s.transform.GetChild(s.transform.childCount - 1).GetComponent<Stone>();
+
+            int index1 = index + 1;
+            int index2 = index - 1;
+            int index3 = index + size;
+            int index4 = index - size;
+            //A literal edge case!
+            if (index % size == 0)
+                index2 = 0;
+
+            int totalSpaces = board.transform.GetChild(0).childCount;
+
+            //for each neighbor
+            Square neighborSquare = null;
+            Stone neighborStone = null;
+            if (index1 > 0 && index1 < totalSpaces && index1 != source)
+            {
+                neighborSquare = board.transform.GetChild(0).GetChild(index1).GetComponent<Square>();
+
+                if (neighborSquare.transform.childCount > 1)
+                {
+                    neighborStone = neighborSquare.transform.GetChild(neighborSquare.transform.childCount - 1).GetComponent<Stone>();
+                    if (neighborStone.CompareTag(TopStone.tag) && neighborStone.Stonetype != Stonetype.StandingStone)
+                    {
+                        returnval = IsSquareOnEdge(index1, edge2);
+                        if (returnval)
+                            return true;
+                        else
+                            return SolveRoad(board.transform.GetChild(0).GetChild(index1).gameObject, index, edge1, edge2);
+                    }
+                }
+            }
+
+            if (index2 > 0 && index2 < totalSpaces && index2 != source)
+            {
+                neighborSquare = board.transform.GetChild(0).GetChild(index2).GetComponent<Square>();
+
+                if (neighborSquare.transform.childCount > 1)
+                {
+                    neighborStone = neighborSquare.transform.GetChild(neighborSquare.transform.childCount - 1).GetComponent<Stone>();
+                    if (neighborStone.CompareTag(TopStone.tag) && neighborStone.Stonetype != Stonetype.StandingStone)
+                    {
+                        returnval = IsSquareOnEdge(index2, edge2);
+                        if (returnval)
+                            return true;
+                        else
+                            return SolveRoad(board.transform.GetChild(0).GetChild(index2).gameObject, index, edge1, edge2);
+                    }
+                }
+            }
+
+            if (index3 > 0 && index3 < totalSpaces && index3 != source)
+            {
+                neighborSquare = board.transform.GetChild(0).GetChild(index3).GetComponent<Square>();
+
+                if (neighborSquare.transform.childCount > 1)
+                {
+                    neighborStone = neighborSquare.transform.GetChild(neighborSquare.transform.childCount - 1).GetComponent<Stone>();
+                    if (neighborStone.CompareTag(TopStone.tag) && neighborStone.Stonetype != Stonetype.StandingStone)
+                    {
+                        returnval = IsSquareOnEdge(index3, edge2);
+                        if (returnval)
+                            return true;
+                        else
+                            return SolveRoad(board.transform.GetChild(0).GetChild(index3).gameObject, index, edge1, edge2);
+                    }
+                }
+            }
+
+            if (index4 > 0 && index4 < totalSpaces && index4 != source)
+            {
+                neighborSquare = board.transform.GetChild(0).GetChild(index4).GetComponent<Square>();
+
+                if (neighborSquare.transform.childCount > 1)
+                {
+                    neighborStone = neighborSquare.transform.GetChild(neighborSquare.transform.childCount - 1).GetComponent<Stone>();
+                    if (neighborStone.CompareTag(TopStone.tag) && neighborStone.Stonetype != Stonetype.StandingStone)
+                    {
+                        returnval = IsSquareOnEdge(index4, edge2);
+                        if (returnval)
+                            return true;
+                        else
+                            return SolveRoad(board.transform.GetChild(0).GetChild(index4).gameObject, index, edge1, edge2);
+                    }
+                }
+            }
+
+            return returnval;
+        }
+
+        bool IsSquareOnEdge(int neighborIndex, GameObject[] Edge)
+        {
+            foreach (GameObject go in Edge)
+            {
+                if (board.transform.GetChild(0).GetChild(neighborIndex) == go.transform)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

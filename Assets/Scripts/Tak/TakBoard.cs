@@ -44,6 +44,8 @@ namespace Tak
         GameObject PlayerOnePool;
         GameObject PlayerTwoPool;
 
+        public GameObject[] LeftEdge,RightEdge,TopEdge,BottomEdge;
+
         public delegate void OnBoardSizeChanged(int BoardSize);
         public static OnBoardSizeChanged OnBoardSizeChangedDelegate;
 
@@ -117,6 +119,8 @@ namespace Tak
                 board.transform.GetChild(j).name = "Square " + (j);
                 board.transform.GetChild(j).GetComponent<Highlights>().SetShouldRaycast(true);
             }
+
+            SetupEdges();
         }
 
         private void ReturnSquaresToPool()
@@ -204,7 +208,49 @@ namespace Tak
         {
             return BoardSize;
         }
+
+        void SetupEdges()
+        {
+            var size = BoardSize.getSize();
+
+            LeftEdge = new GameObject[size];
+            RightEdge = new GameObject[size];
+            BottomEdge = new GameObject[size];
+            TopEdge = new GameObject[size];
+
+            //Get the edge pieces of the board
+            foreach (Square s in GameObject.Find("BoardSpaces").GetComponentsInChildren<Square>())
+            {
+                //Bottom Edge
+                if (s.transform.GetSiblingIndex() < 5)
+                {
+                    //Bottom Edge
+                    s.Setcolor(new Color(1, 0, 0, 1));
+                    BottomEdge[s.transform.GetSiblingIndex()] = s.gameObject;
+                }
+                if (s.transform.GetSiblingIndex() > Mathf.Pow(size, 2) - size - 1)
+                {
+                    //top color
+                    s.Setcolor(new Color(1, 0, 0, 1));
+                    TopEdge[(int)Math.Pow(size, 2) - s.transform.GetSiblingIndex() - 1] = s.gameObject;
+                }
+                if (s.transform.GetSiblingIndex() % size == 0)
+                {
+                    //Left Edge
+                    s.Setcolor(new Color(0, 0, 1, 1));
+                    LeftEdge[s.transform.GetSiblingIndex() / size] = s.gameObject;
+                }
+                if (s.transform.GetSiblingIndex() % size == size - 1)
+                {
+                    //Right Edge
+                    s.Setcolor(new Color(0, 0, 1, 1));
+                    RightEdge[s.transform.GetSiblingIndex() / size] = s.gameObject;
+                }
+            }
+        }
     }
+
+
 #if UNITY_EDITOR
     [CustomPropertyDrawer(typeof(BoardSizeProperty))]
     public class BoardSizePropertyDrawer : PropertyDrawer
@@ -306,7 +352,14 @@ namespace Tak
         {
             this.Sizes = strings;
         }
+
+        public GameObject[] LeftEdge, RightEdge;
+        public GameObject[] BottomEdge, TopEdge;
+
+
     }
+
+
 
 #if UNITY_EDITOR
     [CustomPropertyDrawer(typeof(EnumToString))]

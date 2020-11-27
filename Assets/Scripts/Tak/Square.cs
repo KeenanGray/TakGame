@@ -46,27 +46,25 @@ namespace Tak
                 {
                     //only do this if no piece is on top
                     //set color to selected
-                    _renderer.GetPropertyBlock(_matPropertyBlock);
-                    _matPropertyBlock.SetColor("_Color", palette.SelectedHighlight.Value);
-                    _renderer.SetPropertyBlock(_matPropertyBlock);
+                  //  Setcolor(palette.SelectedHighlight.Value);
+
                 }
                 else
                 {
                     //set color to not selected
-                    _renderer.GetPropertyBlock(_matPropertyBlock);
-                    _matPropertyBlock.SetColor("_Color", new Color(0, 0, 0, 0));
-                    _renderer.SetPropertyBlock(_matPropertyBlock);
+                  //  Setcolor(new Color(0, 0, 0, 0));
+
                 }
             }
             else
             {
                 //set color to not selected
-                _renderer.GetPropertyBlock(_matPropertyBlock);
-                _matPropertyBlock.SetColor("_Color", new Color(0, 0, 0, 0));
-                _renderer.SetPropertyBlock(_matPropertyBlock);
+               // Setcolor(new Color(0, 0, 0, 0));
             }
         }
 
+
+        //stone on top is childCount-1
         void RedoHeights()
         {
             for (int i = 1; i < transform.childCount; i++)
@@ -82,26 +80,33 @@ namespace Tak
 
         public void SetTextureAndSize(int size)
         {
-            if(_renderer==null)
-            _renderer = GetComponentInChildren<Renderer>();
-            if(_matPropertyBlock==null)
-            _matPropertyBlock = new MaterialPropertyBlock();
-            
+            if (_renderer == null)
+                _renderer = GetComponentInChildren<Renderer>();
+            if (_matPropertyBlock == null)
+                _matPropertyBlock = new MaterialPropertyBlock();
+
             if (size % 2 == 0)
             {
                 //set mat texture to square image
-                 _renderer.GetPropertyBlock(_matPropertyBlock);
-                _matPropertyBlock.SetTexture("_MainTex",textures[0]);
+                _renderer.GetPropertyBlock(_matPropertyBlock);
+                _matPropertyBlock.SetTexture("_MainTex", textures[0]);
                 _renderer.SetPropertyBlock(_matPropertyBlock);
             }
             else
             {
                 //set mat texture to diamond image
-                 _renderer.GetPropertyBlock(_matPropertyBlock);
-                _matPropertyBlock.SetTexture("_MainTex",textures[1]);
+                _renderer.GetPropertyBlock(_matPropertyBlock);
+                _matPropertyBlock.SetTexture("_MainTex", textures[1]);
                 _renderer.SetPropertyBlock(_matPropertyBlock);
             }
             transform.localScale = new Vector3(1, 1, 1);
+        }
+
+        public void Setcolor(Color newColor)
+        {
+            _renderer.GetPropertyBlock(_matPropertyBlock);
+            _matPropertyBlock.SetColor("_Color", newColor);
+            _renderer.SetPropertyBlock(_matPropertyBlock);
         }
     }
 }

@@ -62,13 +62,6 @@ public class GlowImageEffect : MonoBehaviour
         Graphics.SetRenderTarget(Blurred);
         GL.Clear(false, true, Color.clear);
 
-        Graphics.Blit(src, Blurred);
-
-        Graphics.SetRenderTarget(Blurred);
-        GL.Clear(false, true, Color.clear);
-
-        Graphics.Blit(src, Blurred);
-
         int width = src.width >> DownRes;
         int height = src.height >> DownRes;
 
@@ -85,6 +78,9 @@ public class GlowImageEffect : MonoBehaviour
         }
 
         Graphics.Blit(rt, Blurred);
+        Graphics.SetRenderTarget(dest);
+
+
 
         Shader.SetGlobalTexture("_GlowBlurredTex", Blurred);
 

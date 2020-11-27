@@ -19,10 +19,10 @@ public class SetPropertyBlockColor : MonoBehaviour
     void Update()
     {
         // Get the current value of the material properties in the renderer.
-        _renderer.GetPropertyBlock(_propBlock);
+      //  _renderer.GetPropertyBlock(_propBlock);
         // Assign our new value.
-        _propBlock.SetColor("_Color", color.Value);
+      //  _propBlock.SetColor("_Color", color.Value);
         // Apply the edited values to the renderer.
-        _renderer.SetPropertyBlock(_propBlock);
+      //  _renderer.SetPropertyBlock(_propBlock);
     }
 }
